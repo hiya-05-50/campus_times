@@ -3,6 +3,8 @@ Rails.application.routes.draw do
   get "login", to: "sessions#new", as: :login
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout
+  get "dashboard", to: "dashboards#show", as: :dashboard
+  get "admin/overview", to: "dashboards#admin_overview", as: :admin_dashboard_overview
 
   get "ai-assistant", to: "ai_assistant#show", as: :ai_assistant
   post "ai-assistant", to: "ai_assistant#create"
@@ -33,5 +35,5 @@ Rails.application.routes.draw do
     end
   end
 
-  root "attendances#index"
+  root "dashboards#show"
 end

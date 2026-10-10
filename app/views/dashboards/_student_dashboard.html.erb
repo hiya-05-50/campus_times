@@ -1,0 +1,159 @@
+<!-- Student Role Dashboard -->
+<% if stats[:attendance][:has_warning] %>
+  <div class="alert alert-warning" style="margin-bottom: 24px;">
+    <div style="font-size: 1.5rem;">⚠️</div>
+    <div>
+      <strong style="font-size: 1.05rem;">Attendance Alert (< 75%)</strong>
+      <p style="margin: 4px 0 0; font-size: 0.9rem;">
+        Your attendance is below 75% in <%= stats[:attendance][:low_attendance_courses].map { |c| "#{c[:name]} (#{c[:percentage]}%)" }.join(", ") %>.
+        <%= link_to "View full attendance records →", attendances_path, style: "color: #92400e; font-weight: 700; margin-left: 6px;" %>
+      </p>
+    </div>
+  </div>
+<% end %>
+
+<div class="grid grid-cols-3" style="margin-bottom: 24px;">
+  <!-- Card 1: Attendance (Links to /attendances) -->
+  <%= link_to attendances_path, style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">📊 My Attendance</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Details ↗</span>
+      </div>
+      <div class="metric-number" style="color: <%= stats[:attendance][:overall_percentage] >= 75.0 ? 'var(--success)' : 'var(--danger)' %>;">
+        <%= stats[:attendance][:overall_percentage] %>%
+      </div>
+      <div class="metric-label">Overall Term Attendance</div>
+      <div class="progress-bar">
+        <div class="progress-fill <%= stats[:attendance][:overall_percentage] >= 75.0 ? 'good' : 'warning' %>" style="width: <%= [stats[:attendance][:overall_percentage], 100].min %>%;"></div>
+      </div>
+      <div style="font-size: 0.85rem; color: var(--gray-600); margin-top: 8px;">
+        <% if stats[:attendance][:low_attendance_count].positive? %>
+          <span style="color: var(--danger); font-weight: 600;">⚠️ <%= stats[:attendance][:low_attendance_count] %> course(s) below threshold</span>
+        <% else %>
+          <span style="color: var(--success); font-weight: 600;">✓ In good academic standing</span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Card 2: Deadlines (Links to /assignments) -->
+  <%= link_to "/assignments", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">⏰ Upcoming Deadlines</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Assignments ↗</span>
+      </div>
+      <div class="metric-number"><%= stats[:deadlines].size %></div>
+      <div class="metric-label">Due Assignments</div>
+      <div style="margin-top: 12px; font-size: 0.85rem;">
+        <% if stats[:deadlines].any? %>
+          <% stats[:deadlines].first(2).each do |d| %>
+            <div style="padding: 4px 0; border-top: 1px solid var(--gray-100); display: flex; justify-content: space-between;">
+              <span style="font-weight: 500; color: var(--gray-800);"><%= d[:title].truncate(24) %></span>
+              <span style="color: var(--danger); font-weight: 600;"><%= d[:days_left] %>d left</span>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="empty-state" style="padding: 12px; border: none; font-size: 0.85rem;">
+            No pending assignment deadlines!
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Card 3: Placements (Links to /placements) -->
+  <%= link_to "/placements", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">💼 Placement Drives</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Placements ↗</span>
+      </div>
+      <div class="metric-number"><%= stats[:placements][:open_drives_count] %></div>
+      <div class="metric-label">Open Campus Drives</div>
+      <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        <span>Applied Drives: <strong><%= stats[:placements][:applications_count] %></strong></span>
+        <div style="margin-top: 6px; font-weight: 500; color: var(--primary);">
+          <%= stats[:placements][:recent_drives]&.first ? "Latest: #{stats[:placements][:recent_drives].first[:company]}" : "Check eligibility & apply" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="grid grid-cols-3" style="gap: 20px;">
+  <!-- Card 4: Campus Events (Links to /events) -->
+  <%= link_to "/events", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s; height: 100%; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="card-title" style="margin: 0;">📅 Campus Events</h3>
+        <span style="font-size: 0.8rem; color: var(--primary);">All Events ↗</span>
+      </div>
+      <% if stats[:events].any? %>
+        <% stats[:events].each do |e| %>
+          <div style="padding: 8px 0; border-bottom: 1px solid var(--gray-100);">
+            <div style="font-weight: 600; font-size: 0.9rem; color: var(--gray-900);"><%= e[:title] %></div>
+            <div style="font-size: 0.8rem; color: var(--gray-600);">
+              <%= e[:date].strftime("%b %d") %> · <%= e[:location] %>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-state" style="padding: 20px;">No events scheduled.</div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Card 5: Complaints / Helpdesk (Links to /complaints) -->
+  <%= link_to "/complaints", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s; height: 100%; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="card-title" style="margin: 0;">🎫 Helpdesk Complaints</h3>
+        <span style="font-size: 0.8rem; color: var(--primary);">Helpdesk ↗</span>
+      </div>
+      <div style="display: flex; gap: 16px; margin-bottom: 12px;">
+        <div>
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--primary);"><%= stats[:complaints][:open_count] %></span>
+          <div class="metric-label">Active Tickets</div>
+        </div>
+        <div>
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--gray-700);"><%= stats[:complaints][:total_count] %></span>
+          <div class="metric-label">Total Filed</div>
+        </div>
+      </div>
+      <% if stats[:complaints][:recent].any? %>
+        <% stats[:complaints][:recent].each do |c| %>
+          <div style="padding: 6px 0; border-top: 1px solid var(--gray-100); font-size: 0.85rem; display: flex; justify-content: space-between;">
+            <span style="color: var(--gray-800);"><%= c[:title].truncate(26) %></span>
+            <span class="badge badge-open" style="font-size: 0.7rem;"><%= c[:status] %></span>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-state" style="padding: 16px; border: none; font-size: 0.85rem;">No active complaints.</div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Card 6: Notifications & Alerts (Links to /notifications) -->
+  <%= link_to "/notifications", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s; height: 100%; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="card-title" style="margin: 0;">🔔 Notifications</h3>
+        <span style="font-size: 0.8rem; color: var(--primary);">Notifications ↗</span>
+      </div>
+      <% if stats[:notifications].any? %>
+        <% stats[:notifications].each do |n| %>
+          <div style="padding: 8px 0; border-bottom: 1px solid var(--gray-100);">
+            <div style="font-weight: 600; font-size: 0.85rem; color: <%= n[:type] == 'warning' ? 'var(--danger)' : 'var(--gray-900)' %>;">
+              <%= n[:title] %>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--gray-600);"><%= n[:message] %></div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-state" style="padding: 20px;">No new notifications.</div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

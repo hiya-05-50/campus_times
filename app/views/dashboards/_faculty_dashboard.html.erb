@@ -1,0 +1,123 @@
+<!-- Faculty Role Dashboard -->
+<div class="grid grid-cols-3" style="margin-bottom: 24px;">
+  <!-- Card 1: Classes & Live Sessions (Links to /class_sessions) -->
+  <%= link_to class_sessions_path, style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">🏫 Taught Classes</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Sessions ↗</span>
+      </div>
+      <div class="metric-number"><%= stats[:classes][:courses_count] %></div>
+      <div class="metric-label">Active Courses Taught</div>
+      <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        <span>Total Sessions: <strong><%= stats[:classes][:total_sessions] %></strong></span>
+        <% if stats[:classes][:active_sessions_count].positive? %>
+          <div style="margin-top: 4px;">
+            <span class="badge badge-open">● <%= stats[:classes][:active_sessions_count] %> Live Session Open</span>
+          </div>
+        <% else %>
+          <div style="margin-top: 4px; color: var(--gray-600);">No active sessions open right now.</div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Card 2: Enrolled Students & Attendance Risk (Links to /attendances) -->
+  <%= link_to attendances_path, style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">👥 Enrolled Students</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Attendance ↗</span>
+      </div>
+      <div class="metric-number"><%= stats[:students][:total_enrolled] %></div>
+      <div class="metric-label">Total Unique Students</div>
+      <div style="margin-top: 12px; font-size: 0.85rem;">
+        <% if stats[:students][:at_risk_count].positive? %>
+          <span style="color: var(--danger); font-weight: 600;">⚠️ <%= stats[:students][:at_risk_count] %> students below 75% attendance</span>
+        <% else %>
+          <span style="color: var(--success); font-weight: 600;">✓ All students above 75% threshold</span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Card 3: Submissions Awaiting Grading (Links to /submissions or /assignments) -->
+  <%= link_to "/submissions", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">📝 Grading Queue</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Grade ↗</span>
+      </div>
+      <div class="metric-number" style="color: <%= stats[:submissions_awaiting_grading][:pending_count].positive? ? 'var(--warning)' : 'var(--gray-800)' %>;">
+        <%= stats[:submissions_awaiting_grading][:pending_count] %>
+      </div>
+      <div class="metric-label">Submissions Awaiting Grading</div>
+      <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        <% if stats[:submissions_awaiting_grading][:recent_submissions].any? %>
+          <div>Latest: <%= stats[:submissions_awaiting_grading][:recent_submissions].first[:assignment_title] %></div>
+        <% else %>
+          <div>Queue is clear! No pending submissions.</div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="grid grid-cols-2" style="gap: 20px;">
+  <!-- Card 4: Projects & Milestone Reviews (Links to /projects) -->
+  <%= link_to "/projects", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="height: 100%; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="card-title" style="margin: 0;">🚀 Student Projects & Milestones</h3>
+        <span style="font-size: 0.8rem; color: var(--primary);">Projects ↗</span>
+      </div>
+      <div style="display: flex; gap: 20px; margin-bottom: 16px;">
+        <div>
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--primary);"><%= stats[:projects][:active_projects_count] %></span>
+          <div class="metric-label">Active Projects</div>
+        </div>
+        <div>
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--warning);"><%= stats[:projects][:review_queue_count] %></span>
+          <div class="metric-label">Reviews Pending</div>
+        </div>
+      </div>
+      <% if stats[:projects][:recent_milestones].any? %>
+        <% stats[:projects][:recent_milestones].each do |m| %>
+          <div style="padding: 8px 0; border-top: 1px solid var(--gray-100); font-size: 0.85rem;">
+            <div style="font-weight: 600; color: var(--gray-900);"><%= m[:title] %> (<%= m[:team] %>)</div>
+            <div style="color: var(--gray-600); font-size: 0.8rem;"><%= m[:milestone] %></div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-state" style="padding: 16px;">No projects currently assigned.</div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Quick Class Sessions Overview (Links to /class_sessions) -->
+  <%= link_to class_sessions_path, style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="height: 100%; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="card-title" style="margin: 0;">⏱️ Recent Attendance Sessions</h3>
+        <span style="font-size: 0.8rem; color: var(--primary);">View All ↗</span>
+      </div>
+      <% if stats[:classes][:recent_sessions].any? %>
+        <% stats[:classes][:recent_sessions].each do |s| %>
+          <div style="padding: 8px 0; border-top: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+            <div>
+              <strong><%= s.course.code %></strong> · <%= s.topic.presence || "Regular Lecture" %>
+              <div style="font-size: 0.78rem; color: var(--gray-600);"><%= s.starts_at.strftime("%b %d at %I:%M %p") %></div>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-weight: 600; color: <%= s.attendance_percentage >= 75.0 ? 'var(--success)' : 'var(--warning)' %>;">
+                <%= s.present_count %> / <%= s.enrolled_count %> (<%= s.attendance_percentage %>%)
+              </span>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-state" style="padding: 16px;">No recent sessions. Start one anytime!</div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
