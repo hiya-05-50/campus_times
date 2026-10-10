@@ -1,0 +1,110 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "attendance" %>
+<% end %>
+
+<div class="container" style="max-width: 580px; margin-top: 40px;">
+  <% if notice.present? %>
+    <div class="alert alert-success">
+      <span><%= notice %></span>
+    </div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="alert alert-danger">
+      <span><%= alert %></span>
+    </div>
+  <% end %>
+
+  <div class="card" style="text-align: center; padding: 36px 24px;">
+    <% if @class_session %>
+      <div style="display: inline-block; padding: 12px; background: var(--primary-light); border-radius: 50%; margin-bottom: 16px;">
+        <span style="font-size: 2rem;">📍</span>
+      </div>
+
+      <span style="font-weight: 700; color: var(--primary); font-size: 0.95rem; display: block;">
+        <%= @course.code %> · <%= @course.department %>
+      </span>
+      <h1 class="title" style="margin: 8px 0 12px; font-size: 1.6rem;"><%= @course.name %></h1>
+      <p class="subtitle" style="margin-bottom: 24px;">
+        Session: <strong><%= @class_session.topic.presence || "Class Lecture" %></strong>
+        <% if @class_session.room.present? %>
+          · Room: <%= @class_session.room %>
+        <% end %>
+      </p>
+
+      <% if @already_marked %>
+        <div class="alert alert-success" style="text-align: left; margin-bottom: 24px;">
+          <div style="font-size: 1.5rem;">✅</div>
+          <div>
+            <strong>Attendance Already Verified!</strong>
+            <p style="margin: 4px 0 0; font-size: 0.9rem;">
+              You have already marked your attendance for this class session.
+            </p>
+          </div>
+        </div>
+        <%= link_to "View My Attendance Records", attendances_path, class: "btn btn-primary" %>
+
+      <% elsif @class_session.closed? %>
+        <div class="alert alert-danger" style="text-align: left; margin-bottom: 24px;">
+          <div style="font-size: 1.5rem;">🔒</div>
+          <div>
+            <strong>Session Closed</strong>
+            <p style="margin: 4px 0 0; font-size: 0.9rem;">
+              This attendance session was closed by the instructor.
+            </p>
+          </div>
+        </div>
+        <%= link_to "Go to Attendance Home", attendances_path, class: "btn btn-secondary" %>
+
+      <% elsif @class_session.expired? %>
+        <div class="alert alert-danger" style="text-align: left; margin-bottom: 24px;">
+          <div style="font-size: 1.5rem;">⏰</div>
+          <div>
+            <strong>Session Expired</strong>
+            <p style="margin: 4px 0 0; font-size: 0.9rem;">
+              The time limit for this attendance session has passed (expired at <%= @class_session.expires_at.strftime("%I:%M %p") %>).
+            </p>
+          </div>
+        </div>
+        <%= link_to "Go to Attendance Home", attendances_path, class: "btn btn-secondary" %>
+
+      <% elsif !@enrolled %>
+        <div class="alert alert-warning" style="text-align: left; margin-bottom: 24px;">
+          <div style="font-size: 1.5rem;">⚠️</div>
+          <div>
+            <strong>Not Enrolled</strong>
+            <p style="margin: 4px 0 0; font-size: 0.9rem;">
+              You are not registered in <strong><%= @course.name %></strong>. Only students officially enrolled in this course can record attendance.
+            </p>
+          </div>
+        </div>
+        <%= link_to "Go to Attendance Home", attendances_path, class: "btn btn-secondary" %>
+
+      <% else %>
+        <div style="background: var(--warning-light); border: 1px solid #fde68a; border-radius: var(--radius); padding: 12px; margin-bottom: 24px;">
+          <span style="font-size: 0.9rem; color: #92400e; font-weight: 500;">
+            ⏳ Session expires in <strong><%= @class_session.seconds_remaining / 60 %> minutes</strong>
+          </span>
+        </div>
+
+        <%= form_with url: attendances_path, method: :post, local: true do |f| %>
+          <%= hidden_field_tag :token, @token %>
+          <div style="margin-bottom: 16px;">
+            <p style="font-size: 0.95rem; color: var(--gray-600); margin: 0 0 16px;">
+              Marking as: <strong><%= current_user.name %></strong> (<%= current_user.email %>)
+            </p>
+          </div>
+          <%= f.submit "✓ Mark My Attendance Now", class: "btn btn-primary", style: "width: 100%; justify-content: center; font-size: 1.05rem; padding: 12px 20px;" %>
+        <% end %>
+      <% end %>
+
+    <% else %>
+      <div class="empty-state">
+        <div class="empty-state-icon">❌</div>
+        <h3>Invalid Attendance Session</h3>
+        <p>The link or token you entered is invalid or does not exist.</p>
+        <%= link_to "Return to Attendance Portal", attendances_path, class: "btn btn-secondary", style: "margin-top: 12px;" %>
+      </div>
+    <% end %>
+  </div>
+</div>

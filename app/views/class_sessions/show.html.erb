@@ -1,0 +1,161 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "attendance" %>
+<% end %>
+
+<div class="container">
+  <div style="margin-bottom: 16px;">
+    <%= link_to "← Back to Class Sessions", class_sessions_path, style: "color: var(--primary); text-decoration: none; font-weight: 500;" %>
+  </div>
+
+  <% if notice.present? %>
+    <div class="alert alert-success">
+      <span><%= notice %></span>
+    </div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="alert alert-danger">
+      <span><%= alert %></span>
+    </div>
+  <% end %>
+
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="header-bar" style="margin-bottom: 12px;">
+      <div>
+        <span style="font-weight: 700; color: var(--primary);"><%= @course.code %> · <%= @course.department %></span>
+        <h1 class="title" style="margin: 6px 0;"><%= @course.name %></h1>
+        <p class="subtitle">
+          Topic: <strong><%= @class_session.topic.presence || "General Session" %></strong>
+          <% if @class_session.room.present? %>
+            · Room: <strong><%= @class_session.room %></strong>
+          <% end %>
+          · Instructor: <%= @class_session.faculty&.name %>
+        </p>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <% if @class_session.open? %>
+          <span class="badge badge-open">Open (<%= @class_session.seconds_remaining / 60 %>m remaining)</span>
+          <% if current_user.faculty? || current_user.admin? %>
+            <%= button_to "Close Session Early", close_class_session_path(@class_session), method: :patch, class: "btn btn-danger", style: "padding: 8px 14px; font-size: 0.85rem;" %>
+          <% end %>
+        <% elsif @class_session.closed? %>
+          <span class="badge badge-closed">Session Closed</span>
+        <% else %>
+          <span class="badge badge-danger">Session Expired</span>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @class_session.open? %>
+      <div style="margin: 20px 0; background: var(--primary-light); border: 1px solid #bfdbfe; border-radius: var(--radius); padding: 18px;">
+        <h3 style="margin: 0 0 8px; color: var(--primary); font-size: 1rem; font-weight: 600;">🔗 Shareable Attendance Link (Time-Limited)</h3>
+        <p style="margin: 0 0 10px; font-size: 0.88rem; color: var(--gray-700);">Students enrolled in this course can mark attendance using the link or token below before it expires.</p>
+        <div class="url-box">
+          <span style="font-size: 0.9rem;"><%= @attendance_url %></span>
+          <div style="display: flex; gap: 8px;">
+            <%= link_to "Open Link ↗", @attendance_url, target: "_blank", class: "btn btn-primary", style: "padding: 6px 12px; font-size: 0.85rem;" %>
+          </div>
+        </div>
+        <div style="margin-top: 8px; font-size: 0.8rem; color: var(--gray-600);">
+          Token: <code><%= @class_session.token %></code> · Expires at <%= @class_session.expires_at.strftime("%I:%M %p (%b %d)") %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="grid grid-cols-3" style="margin-top: 20px;">
+      <div style="background: var(--gray-50); padding: 16px; border-radius: var(--radius); border: 1px solid var(--gray-200);">
+        <div class="metric-number"><%= @class_session.present_count %></div>
+        <div class="metric-label">Students Present</div>
+      </div>
+      <div style="background: var(--gray-50); padding: 16px; border-radius: var(--radius); border: 1px solid var(--gray-200);">
+        <div class="metric-number"><%= @class_session.enrolled_count %></div>
+        <div class="metric-label">Total Enrolled Students</div>
+      </div>
+      <div style="background: var(--gray-50); padding: 16px; border-radius: var(--radius); border: 1px solid var(--gray-200);">
+        <div class="metric-number" style="color: <%= @class_session.attendance_percentage >= 75.0 ? 'var(--success)' : 'var(--warning)' %>;">
+          <%= @class_session.attendance_percentage %>%
+        </div>
+        <div class="metric-label">Session Turnout</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2" style="gap: 24px;">
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; color: var(--gray-900);">
+        Attended Students (<%= @attendances.size %>)
+      </h2>
+      <div class="table-responsive">
+        <% if @attendances.any? %>
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Marked At</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @attendances.each do |attendance| %>
+                <tr>
+                  <td>
+                    <strong><%= attendance.student.name %></strong>
+                    <div style="font-size: 0.78rem; color: var(--gray-600);"><%= attendance.student.email %></div>
+                  </td>
+                  <td style="font-size: 0.85rem;"><%= attendance.marked_at.strftime("%I:%M:%S %p") %></td>
+                  <td><span class="badge badge-success">Present</span></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <div class="empty-state" style="padding: 30px;">
+            <p style="margin: 0;">No students have marked attendance yet.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; color: var(--gray-900);">
+        Unmarked / Absent Students (<%= @unattended_students.size %>)
+      </h2>
+      <div class="table-responsive">
+        <% if @unattended_students.any? %>
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Overall Course Attendance</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @unattended_students.each do |student| %>
+                <% pct = student.attendance_percentage_for(@course) %>
+                <tr>
+                  <td>
+                    <strong><%= student.name %></strong>
+                    <div style="font-size: 0.78rem; color: var(--gray-600);"><%= student.email %></div>
+                  </td>
+                  <td>
+                    <span style="font-weight: 600; color: <%= pct >= 75.0 ? 'var(--success)' : 'var(--danger)' %>;"><%= pct %>%</span>
+                    <% if pct < 75.0 %>
+                      <span class="badge badge-danger" style="margin-left: 4px;">At Risk</span>
+                    <% end %>
+                  </td>
+                  <td><span class="badge badge-closed">Unmarked</span></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        <% else %>
+          <div class="empty-state" style="padding: 30px;">
+            <p style="margin: 0;">All enrolled students have marked attendance!</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

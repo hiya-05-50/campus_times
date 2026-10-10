@@ -1,0 +1,55 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "attendance" %>
+<% end %>
+
+<div class="container" style="max-width: 680px;">
+  <div style="margin-bottom: 16px;">
+    <%= link_to "← Back to Class Sessions", class_sessions_path, style: "color: var(--primary); text-decoration: none; font-weight: 500;" %>
+  </div>
+
+  <div class="card">
+    <h1 class="title" style="margin-bottom: 8px;">Open Attendance Session</h1>
+    <p class="subtitle" style="margin-bottom: 24px;">Create an attendance session for your class. A secure time-limited token and link will be generated automatically.</p>
+
+    <% if @class_session.errors.any? %>
+      <div class="alert alert-danger">
+        <div>
+          <strong>Could not start attendance session:</strong>
+          <ul style="margin: 6px 0 0; padding-left: 20px;">
+            <% @class_session.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+
+    <%= form_with model: @class_session, url: class_sessions_path, local: true do |f| %>
+      <div style="margin-bottom: 20px;">
+        <%= f.label :course_id, "Select Course", style: "display: block; font-weight: 600; margin-bottom: 6px;" %>
+        <%= f.collection_select :course_id, @courses, :id, ->(c) { "#{c.code} — #{c.name} (#{c.department})" }, { prompt: "-- Choose Course --" }, { style: "width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-size: 1rem;", required: true } %>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <%= f.label :topic, "Topic / Lecture Subject", style: "display: block; font-weight: 600; margin-bottom: 6px;" %>
+        <%= f.text_field :topic, placeholder: "e.g., Week 4: Dynamic Programming & Recursion", style: "width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-size: 1rem; box-sizing: border-box;" %>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <%= f.label :room, "Room / Classroom (Optional)", style: "display: block; font-weight: 600; margin-bottom: 6px;" %>
+        <%= f.text_field :room, placeholder: "e.g., Lab 204 or Hall A", style: "width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-size: 1rem; box-sizing: border-box;" %>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <%= f.label :duration_minutes, "Session Validity Duration", style: "display: block; font-weight: 600; margin-bottom: 6px;" %>
+        <%= f.select :duration_minutes, [["5 Minutes (Quick Check-in)", 5], ["10 Minutes (Standard)", 10], ["15 Minutes", 15], ["30 Minutes", 30], ["60 Minutes", 60]], { selected: 10 }, { style: "width: 100%; padding: 10px 12px; border: 1px solid var(--gray-300); border-radius: var(--radius); font-size: 1rem;" } %>
+        <small style="color: var(--gray-600); display: block; margin-top: 4px;">Once opened, the session link will expire after this time window.</small>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <%= link_to "Cancel", class_sessions_path, class: "btn btn-secondary" %>
+        <%= f.submit "Open Attendance Session", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+</div>
