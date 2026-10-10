@@ -1,0 +1,77 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "assignments", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Assignments — <%= @course.name %></h1>
+      <p class="page-subtitle"><%= @course.code %> · <%= @course.semester %></p>
+    </div>
+    <% if current_user.faculty? && @course.faculty_id == current_user.id %>
+      <a href="<%= new_course_assignment_path(@course) %>" class="btn btn-primary">+ New Assignment</a>
+    <% end %>
+  </div>
+
+  <% if flash[:notice] %>
+    <div class="flash-notice"><%= flash[:notice] %></div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="flash-alert"><%= flash[:alert] %></div>
+  <% end %>
+
+  <% if @assignments.any? %>
+    <div class="card-grid">
+      <% @assignments.each do |assignment| %>
+        <div class="assignment-card">
+          <div class="assignment-card-header">
+            <h3 class="assignment-card-title">
+              <a href="<%= course_assignment_path(@course, assignment) %>"><%= assignment.title %></a>
+            </h3>
+            <% if current_user.faculty? %>
+              <% if assignment.published? %>
+                <span class="badge badge-success">Published</span>
+              <% else %>
+                <span class="badge badge-warning">Draft</span>
+              <% end %>
+            <% end %>
+          </div>
+          <p class="assignment-card-desc"><%= truncate(assignment.description, length: 120) %></p>
+          <div class="assignment-card-meta">
+            <span class="meta-item">
+              <strong>Deadline:</strong> <%= assignment.deadline.strftime("%b %d, %Y %I:%M %p") %>
+              <% if assignment.past_deadline? %>
+                <span class="badge badge-danger">Past Due</span>
+              <% end %>
+            </span>
+            <span class="meta-item"><strong>Max Marks:</strong> <%= assignment.max_marks %></span>
+          </div>
+          <% if current_user.student? %>
+            <% sub = assignment.submissions.find_by(student: current_user) %>
+            <% if sub %>
+              <div class="submission-status submitted">
+                ✓ Submitted
+                <% if sub.marks.present? %>
+                  — <strong><%= sub.marks %>/<%= assignment.max_marks %></strong>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="submission-status pending">○ Not submitted</div>
+            <% end %>
+          <% elsif current_user.faculty? %>
+            <div class="submission-status">
+              <%= assignment.submissions.count %> submission(s)
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <p>No assignments yet.</p>
+      <% if current_user.faculty? && @course.faculty_id == current_user.id %>
+        <a href="<%= new_course_assignment_path(@course) %>" class="btn btn-primary">Create the first assignment</a>
+      <% end %>
+    </div>
+  <% end %>
+</div>

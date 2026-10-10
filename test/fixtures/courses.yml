@@ -1,0 +1,15 @@
+ruby_course:
+  name: Ruby Programming
+  code: CS201
+  description: Learn Ruby programming language
+  faculty: faculty_alice
+  semester: Fall 2025
+  department: Computer Science
+
+math_course:
+  name: Mathematics 101
+  code: MATH101
+  description: Basic mathematics
+  faculty: faculty_bob
+  semester: Fall 2025
+  department: Mathematics

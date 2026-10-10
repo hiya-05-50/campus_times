@@ -1,0 +1,54 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "assignments", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Welcome, <%= current_user.name %>!</h1>
+      <p class="page-subtitle">Role: <%= current_user.role.capitalize %> (<%= current_user.email %>)</p>
+    </div>
+    <div>
+      <%= button_to "Sign Out", logout_path, method: :delete, class: "btn btn-secondary" %>
+    </div>
+  </div>
+
+  <% if flash[:notice] %>
+    <div class="flash-notice"><%= flash[:notice] %></div>
+  <% end %>
+
+  <div class="assignment-detail">
+    <div class="detail-section">
+      <h2 class="section-title">Course Enrollment / Assignment Portal</h2>
+      <% if current_user.faculty? %>
+        <% if current_user.taught_courses.any? %>
+          <p>Your courses:</p>
+          <ul>
+            <% current_user.taught_courses.each do |c| %>
+              <li>
+                <strong><%= c.name %> (<%= c.code %>)</strong> — 
+                <%= link_to "View Assignments", course_assignments_path(c), class: "link" %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p>You do not currently teach any courses. Once a course is created with you as faculty, its assignments will appear here.</p>
+        <% end %>
+      <% elsif current_user.student? %>
+        <% if current_user.enrolled_courses.any? %>
+          <p>Your enrolled courses:</p>
+          <ul>
+            <% current_user.enrolled_courses.each do |c| %>
+              <li>
+                <strong><%= c.name %> (<%= c.code %>)</strong> — 
+                <%= link_to "View Assignments", course_assignments_path(c), class: "link" %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p>You are not currently enrolled in any courses. Once enrolled, you will be able to view and submit course assignments.</p>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

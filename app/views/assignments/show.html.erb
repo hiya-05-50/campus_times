@@ -1,0 +1,163 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "assignments", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="page-container">
+  <% if flash[:notice] %>
+    <div class="flash-notice"><%= flash[:notice] %></div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="flash-alert"><%= flash[:alert] %></div>
+  <% end %>
+
+  <div class="page-header">
+    <div>
+      <a href="<%= course_assignments_path(@course) %>" class="back-link">← Back to Assignments</a>
+      <h1 class="page-title"><%= @assignment.title %></h1>
+      <p class="page-subtitle"><%= @course.name %> (<%= @course.code %>)</p>
+    </div>
+    <% if current_user.faculty? && @course.faculty_id == current_user.id %>
+      <a href="<%= edit_course_assignment_path(@course, @assignment) %>" class="btn btn-secondary">Edit Assignment</a>
+    <% end %>
+  </div>
+
+  <div class="assignment-detail">
+    <div class="detail-section">
+      <div class="detail-meta">
+        <div class="meta-item">
+          <strong>Deadline:</strong> <%= @assignment.deadline.strftime("%B %d, %Y at %I:%M %p") %>
+          <% if @assignment.past_deadline? %>
+            <span class="badge badge-danger">Past Due</span>
+          <% end %>
+        </div>
+        <div class="meta-item"><strong>Maximum Marks:</strong> <%= @assignment.max_marks %></div>
+        <div class="meta-item">
+          <strong>Status:</strong>
+          <% if @assignment.published? %>
+            <span class="badge badge-success">Published</span>
+          <% else %>
+            <span class="badge badge-warning">Draft</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2 class="section-title">Description</h2>
+      <div class="description-content"><%= simple_format(@assignment.description) %></div>
+    </div>
+
+    <%# Student View: Submission Section %>
+    <% if current_user.student? %>
+      <div class="detail-section">
+        <h2 class="section-title">Your Submission</h2>
+
+        <% if @submission %>
+          <div class="submission-detail">
+            <div class="submission-info">
+              <p><strong>Submitted:</strong> <%= @submission.submitted_at&.strftime("%B %d, %Y at %I:%M %p") || "N/A" %></p>
+              <% if @submission.file.attached? %>
+                <p><strong>File:</strong> <%= @submission.file.filename %>
+                  (<%= number_to_human_size(@submission.file.byte_size) %>)
+                </p>
+              <% end %>
+              <% if @submission.marks.present? %>
+                <p><strong>Marks:</strong> <%= @submission.marks %> / <%= @assignment.max_marks %></p>
+              <% end %>
+              <% if @submission.feedback.present? %>
+                <div class="feedback-box">
+                  <strong>Faculty Feedback:</strong>
+                  <p><%= simple_format(@submission.feedback) %></p>
+                </div>
+              <% end %>
+            </div>
+
+            <% unless @assignment.past_deadline? %>
+              <div class="replace-form">
+                <h3>Replace Submission File</h3>
+                <%= form_with url: course_assignment_submission_path(@course, @assignment, @submission), method: :patch, multipart: true, class: "upload-form" do |f| %>
+                  <div class="form-group">
+                    <input type="file" name="submission[file]" class="form-input-file" required>
+                    <p class="form-hint">Accepted: PDF, Word, TXT, PNG, JPEG, ZIP (max 10 MB)</p>
+                  </div>
+                  <button type="submit" class="btn btn-secondary">Replace File</button>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <% if @assignment.past_deadline? %>
+            <div class="empty-state">
+              <p>The deadline has passed. Submissions are no longer accepted.</p>
+            </div>
+          <% else %>
+            <div class="upload-section">
+              <%= form_with url: course_assignment_submissions_path(@course, @assignment), method: :post, multipart: true, class: "upload-form" do |f| %>
+                <div class="form-group">
+                  <label class="form-label">Upload Your Submission</label>
+                  <input type="file" name="submission[file]" class="form-input-file" required>
+                  <p class="form-hint">Accepted: PDF, Word, TXT, PNG, JPEG, ZIP (max 10 MB)</p>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit Assignment</button>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Faculty View: Submissions List %>
+    <% if current_user.faculty? && @course.faculty_id == current_user.id %>
+      <div class="detail-section">
+        <h2 class="section-title">Student Submissions (<%= @submissions.count %>)</h2>
+
+        <% if @submissions.any? %>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Submitted At</th>
+                  <th>File</th>
+                  <th>Marks</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @submissions.each do |submission| %>
+                  <tr>
+                    <td><%= submission.student.name %></td>
+                    <td><%= submission.submitted_at&.strftime("%b %d, %Y %I:%M %p") || "—" %></td>
+                    <td>
+                      <% if submission.file.attached? %>
+                        <%= submission.file.filename %>
+                      <% else %>
+                        <span class="text-muted">No file</span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <% if submission.marks.present? %>
+                        <%= submission.marks %> / <%= @assignment.max_marks %>
+                      <% else %>
+                        <span class="text-muted">Not graded</span>
+                      <% end %>
+                    </td>
+                    <td>
+                      <a href="<%= course_assignment_submission_path(@course, @assignment, submission) %>" class="btn btn-sm btn-secondary">
+                        <%= submission.marks.present? ? "View" : "Grade" %>
+                      </a>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="empty-state">
+            <p>No submissions received yet.</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+john_ruby:
+  student: student_john
+  course: ruby_course
+  status: active
+
+jane_math:
+  student: student_jane
+  course: math_course
+  status: active
