@@ -1,0 +1,32 @@
+<div class="mx-auto md:w-2/3 w-full">
+  <div class="mx-auto">
+    <% if notice.present? %>
+      <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"><%= notice %></p>
+    <% end %>
+
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div class="px-6 py-4">
+        <h1 class="font-bold text-4xl mb-2"><%= @course.name %></h1>
+        <p class="text-gray-700 text-lg mb-4"><strong>Code:</strong> <%= @course.code %></p>
+        
+        <div class="mb-4">
+          <h3 class="font-semibold text-lg">Description:</h3>
+          <p class="text-gray-600"><%= @course.description %></p>
+        </div>
+
+        <div class="mb-4">
+          <h3 class="font-semibold text-lg">Faculty:</h3>
+          <p class="text-gray-600"><%= @course.faculty ? @course.faculty.email : "Not Assigned" %></p>
+        </div>
+      </div>
+      
+      <div class="px-6 py-4 bg-gray-50">
+        <%= link_to "Edit this course", edit_course_path(@course), class: "mt-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+        <div class="inline-block ml-2">
+          <%= button_to "Destroy this course", @course, method: :delete, class: "mt-2 rounded-lg py-3 px-5 bg-red-100 text-red-700 font-medium", form: { data: { turbo_confirm: 'Are you sure?' } } %>
+        </div>
+        <%= link_to "Back to courses", courses_path, class: "ml-2 rounded-lg py-3 px-5 bg-gray-100 inline-block font-medium" %>
+      </div>
+    </div>
+  </div>
+</div>
