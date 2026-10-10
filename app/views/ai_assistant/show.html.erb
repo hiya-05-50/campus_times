@@ -1,0 +1,30 @@
+<% content_for :title, "Campus AI" %>
+<% content_for :head do %><%= stylesheet_link_tag "ai_assistant", "data-turbo-track": "reload" %><% end %>
+<main class="ai-shell">
+  <section class="ai-panel" aria-labelledby="ai-title">
+    <header class="ai-header">
+      <div><p class="ai-eyebrow">CAMPUS TIMES</p><h1 id="ai-title">Campus AI</h1><p>Your campus companion, ready to help.</p></div>
+      <span class="ai-status"><i></i> Demo mode</span>
+    </header>
+
+    <div class="ai-conversation" aria-live="polite" aria-label="Conversation">
+      <article class="ai-message ai-message-assistant"><span class="ai-avatar">✦</span><p>Hi<%= " #{current_user.respond_to?(:name) ? current_user.name.to_s.split.first : "there"}" %>! Ask me about your campus day. I’ll only use information available to your account.</p></article>
+      <% @messages.each do |message| %>
+        <article class="ai-message <%= message["role"] == "user" ? "ai-message-user" : "ai-message-assistant" %>"><p><%= message["content"] %></p></article>
+      <% end %>
+    </div>
+
+    <div class="ai-suggestions"><h2>Try asking</h2><div class="ai-suggestion-list">
+      <% @suggestions.each do |suggestion| %>
+        <%= button_to suggestion, "/ai-assistant", method: :post, params: { question: suggestion }, class: "ai-suggestion" %>
+      <% end %>
+    </div></div>
+
+    <%= form_with url: "/ai-assistant", method: :post, class: "ai-composer" do |form| %>
+      <%= form.label :question, "Message Campus AI", class: "visually-hidden" %>
+      <%= form.text_field :question, placeholder: "Ask anything about campus…", maxlength: Ai::AssistantService::MAX_QUESTION_LENGTH, autocomplete: "off", required: true %>
+      <%= form.button "Send", class: "ai-send" %>
+    <% end %>
+    <footer class="ai-footer"><span>Demo answers don’t include live campus records.</span><%= button_to "Clear conversation", "/ai-assistant/reset", method: :delete, class: "ai-clear" %></footer>
+  </section>
+</main>
