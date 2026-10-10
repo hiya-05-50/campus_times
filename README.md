@@ -1,6 +1,6 @@
 # Campus Times
 
-Campus Times provides campus course management, attendance, assignment submissions, and an optional AI assistant.
+Campus Times provides campus course management, attendance, assignment submissions, placements, and an optional AI assistant.
 
 ## Setup
 
@@ -19,5 +19,6 @@ bin/rails zeitwerk:check
 - **Campus AI:** `GET /ai-assistant`, `POST /ai-assistant`, and `DELETE /ai-assistant/reset`. Demo responses work without an API key. Set `CAMPUS_AI_PROVIDER=external` and `CAMPUS_AI_API_KEY` to use the optional OpenAI-compatible provider; `CAMPUS_AI_MODEL` is optional. The provider receives only the user's question and short chat history.
 - **Attendance:** Faculty create time-limited sessions with unique attendance URLs. The application checks expiry, enrollment, and duplicate attendance and reports attendance rates.
 - **Assignments:** Faculty manage assignments and grade submissions. Enrolled students submit permitted files before deadlines. Active Storage stores submissions.
+- **Placements:** Administrators manage companies and drives. Students can review eligibility and apply; eligibility uses department, CGPA, backlogs, and graduation year.
 
-Authentication uses session-backed accounts. User records need a password to sign in.
+Authentication uses session-backed accounts. User records need a password to sign in. Placement seed data can be loaded with `bin/rails runner db/seeds/placements.rb`.

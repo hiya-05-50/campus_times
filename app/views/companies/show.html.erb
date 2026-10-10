@@ -1,0 +1,65 @@
+<div class="placement-container">
+  <%= stylesheet_link_tag "placements", "data-turbo-track": "reload" %>
+
+  <% if notice.present? %>
+    <div class="flash-notice"><%= notice %></div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= link_to "← Back to Companies", companies_path, class: "placement-btn placement-btn-secondary" %>
+  </div>
+
+  <div class="placement-header">
+    <div>
+      <h1><%= @company.name %></h1>
+      <div class="subtitle"><%= @company.industry %> | <%= @company.location %></div>
+    </div>
+    <div class="placement-nav-links">
+      <% if admin_user? %>
+        <%= link_to "Edit Company", edit_company_path(@company), class: "placement-btn placement-btn-secondary" %>
+        <%= button_to "Delete Company", company_path(@company), method: :delete, data: { turbo_confirm: "Are you sure? This will delete all associated placement drives." }, class: "placement-btn placement-btn-danger" %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="placement-card" style="margin-bottom: 2rem;">
+    <h3>About Company</h3>
+    <p style="white-space: pre-line; color: var(--placement-gray-700);"><%= @company.description.presence || "No description provided." %></p>
+    <div class="placement-meta" style="margin-top: 1rem;">
+      <div><strong>Website:</strong> <%= safe_external_link(@company.website, style: "color: var(--placement-primary);") || @company.website %></div>
+      <div><strong>Contact Person:</strong> <%= @company.contact_person.presence || "N/A" %></div>
+      <div><strong>Contact Email:</strong> <%= @company.contact_email.presence || "N/A" %></div>
+    </div>
+  </div>
+
+  <h3>Placement Drives by <%= @company.name %></h3>
+  <% if @placement_drives.empty? %>
+    <p style="color: var(--placement-gray-600);">No placement drives have been posted by this company yet.</p>
+  <% else %>
+    <div class="placement-grid">
+      <% @placement_drives.each do |drive| %>
+        <div class="placement-card">
+          <div>
+            <div class="placement-card-header">
+              <h4 style="margin: 0;"><%= drive.title %></h4>
+              <% if drive.open? %>
+                <span class="placement-badge badge-open">Open</span>
+              <% else %>
+                <span class="placement-badge badge-closed">Closed</span>
+              <% end %>
+            </div>
+            <div class="job-role"><%= drive.job_role %></div>
+            <div class="placement-meta">
+              <div><strong>Package:</strong> <%= drive.ctc_or_stipend.presence || "Competitive" %></div>
+              <div><strong>Batch:</strong> Class of <%= drive.graduation_year %></div>
+              <div><strong>Deadline:</strong> <%= drive.application_deadline.strftime("%b %d, %Y") %></div>
+            </div>
+          </div>
+          <div class="placement-card-footer">
+            <%= link_to "View Drive", placement_drive_path(drive), class: "placement-btn placement-btn-primary" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

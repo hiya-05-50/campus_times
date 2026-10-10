@@ -1,0 +1,134 @@
+<div class="placement-container">
+  <%= stylesheet_link_tag "placements", "data-turbo-track": "reload" %>
+
+  <% if notice.present? %>
+    <div class="flash-notice"><%= notice %></div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="flash-alert"><%= alert %></div>
+  <% end %>
+
+  <div class="placement-header">
+    <div>
+      <h1>Campus Placements</h1>
+      <div class="subtitle">Explore active campus recruitment drives, verify eligibility, and track your applications.</div>
+    </div>
+    <div class="placement-nav-links">
+      <% if student_user? %>
+        <%= link_to "My Applications", placement_applications_path, class: "placement-btn placement-btn-secondary" %>
+      <% end %>
+      <% if admin_user? %>
+        <%= link_to "Manage Applications", placement_applications_path, class: "placement-btn placement-btn-secondary" %>
+        <%= link_to "+ New Placement Drive", new_placement_drive_path, class: "placement-btn placement-btn-primary" %>
+      <% end %>
+      <%= link_to "Companies", companies_path, class: "placement-btn placement-btn-secondary" %>
+    </div>
+  </div>
+
+  <div class="placement-user-bar">
+    <div>
+      <strong>Signed in as:</strong> <%= current_user&.name %>
+      <span class="placement-badge badge-role"><%= current_user&.role %></span>
+      <% if student_user? %>
+        | <strong>Dept:</strong> <%= current_user&.department&.name || "N/A" %>
+        | <strong>CGPA:</strong> <%= current_user&.cgpa || "N/A" %>
+        | <strong>Backlogs:</strong> <%= current_user&.backlogs_count || 0 %>
+        | <strong>Graduation:</strong> <%= current_user&.graduation_year || "N/A" %>
+      <% end %>
+    </div>
+    <% if Rails.env.development? || Rails.env.test? %>
+      <div style="font-size: 0.8rem; color: var(--placement-gray-600);">
+        Demo role:
+        <%= link_to "Student", placement_drives_path(as_user_id: User.find_by(role: "student")&.id), style: "text-decoration: underline; margin-right: 6px;" if User.find_by(role: "student") %>
+        <%= link_to "Admin", placement_drives_path(as_user_id: User.find_by(role: "admin")&.id), style: "text-decoration: underline;" if User.find_by(role: "admin") %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="placement-filters">
+    <span>Filter:</span>
+    <%= link_to "Open Drives", placement_drives_path(status: "open", department_id: params[:department_id]), class: "filter-pill #{@status_filter == 'open' ? 'active' : ''}" %>
+    <%= link_to "All Drives", placement_drives_path(status: "all", department_id: params[:department_id]), class: "filter-pill #{@status_filter == 'all' ? 'active' : ''}" %>
+    <%= link_to "Closed Drives", placement_drives_path(status: "closed", department_id: params[:department_id]), class: "filter-pill #{@status_filter == 'closed' ? 'active' : ''}" %>
+
+    <% if @departments.any? %>
+      <span style="margin-left: 1rem;">Department:</span>
+      <%= link_to "All", placement_drives_path(status: @status_filter), class: "filter-pill #{@department_filter.blank? ? 'active' : ''}" %>
+      <% @departments.each do |dept| %>
+        <%= link_to dept.code, placement_drives_path(status: @status_filter, department_id: dept.id), class: "filter-pill #{@department_filter.to_s == dept.id.to_s ? 'active' : ''}" %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if @placement_drives.empty? %>
+    <div class="placement-card placement-empty">
+      <h3>No placement drives found</h3>
+      <p>There are no placement drives matching your selected filters.</p>
+      <% if admin_user? %>
+        <p><%= link_to "+ Create the first placement drive", new_placement_drive_path, class: "placement-btn placement-btn-primary" %></p>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="placement-grid">
+      <% @placement_drives.each do |drive| %>
+        <% app = @user_applications[drive.id] %>
+        <% eligibility = student_user? ? drive.eligibility_for(current_user) : nil %>
+
+        <div class="placement-card">
+          <div>
+            <div class="placement-card-header">
+              <div>
+                <h3 class="company-title"><%= drive.company.name %></h3>
+                <div class="job-role"><%= drive.job_role %></div>
+              </div>
+              <div>
+                <% if drive.open? %>
+                  <span class="placement-badge badge-open">Open</span>
+                <% else %>
+                  <span class="placement-badge badge-closed">Closed</span>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="placement-meta">
+              <div><strong>Package / CTC:</strong> <%= drive.ctc_or_stipend.presence || "Competitive" %></div>
+              <div><strong>Location:</strong> <%= drive.job_location.presence || "Multiple / Remote" %></div>
+              <div><strong>Employment:</strong> <%= drive.employment_type %></div>
+              <div><strong>Batch:</strong> Class of <%= drive.graduation_year %></div>
+              <div><strong>Deadline:</strong> <%= drive.application_deadline.strftime("%b %d, %Y %I:%M %p") %></div>
+            </div>
+
+            <div class="placement-criteria-list">
+              <span class="criteria-tag">Min CGPA: <%= drive.minimum_cgpa %></span>
+              <span class="criteria-tag">Max Backlogs: <%= drive.maximum_backlogs %></span>
+              <% if drive.departments.any? %>
+                <span class="criteria-tag">Depts: <%= drive.departments.map(&:code).join(", ") %></span>
+              <% else %>
+                <span class="criteria-tag">All Departments</span>
+              <% end %>
+            </div>
+
+            <% if student_user? %>
+              <div style="margin-top: 0.75rem;">
+                <% if app.present? %>
+                  <span class="placement-badge badge-<%= app.status %>">Application: <%= app.status.capitalize %></span>
+                <% elsif eligibility&.eligible? %>
+                  <span class="placement-badge badge-open">✓ You are eligible</span>
+                <% else %>
+                  <span class="placement-badge badge-closed">✕ Not Eligible (<%= eligibility&.failed_conditions&.count %> failed)</span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="placement-card-footer">
+            <span style="font-size: 0.8rem; color: var(--placement-gray-600);">
+              <%= pluralize(drive.placement_applications.count, "applicant") %>
+            </span>
+            <%= link_to "View Details & Apply", placement_drive_path(drive), class: "placement-btn placement-btn-primary" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

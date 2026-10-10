@@ -1,6 +1,5 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
-
   get "login", to: "sessions#new", as: :login
   post "login", to: "sessions#create"
   delete "logout", to: "sessions#destroy", as: :logout
@@ -22,6 +21,17 @@ Rails.application.routes.draw do
   resources :attendances, only: %i[index create]
   get "attendances/mark", to: "attendances#mark", as: :mark_attendance
   get "class_sessions/:token/attend", to: "attendances#mark", as: :attend_session
+
+  resources :companies
+  resources :placement_drives, path: "placements" do
+    resources :applications, controller: "placement_applications", only: %i[index create]
+  end
+  resources :placement_applications, only: %i[index show update destroy] do
+    member do
+      patch :withdraw
+      delete :withdraw
+    end
+  end
 
   root "attendances#index"
 end

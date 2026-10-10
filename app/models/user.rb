@@ -2,6 +2,7 @@ class User < ApplicationRecord
   ROLES = %w[student faculty admin staff].freeze
 
   has_secure_password
+  belongs_to :department, optional: true
   has_many :enrollments, dependent: :destroy, inverse_of: :user
   has_many :enrolled_courses, through: :enrollments, source: :course
   has_many :taught_courses, class_name: "Course", foreign_key: :faculty_id, dependent: :nullify, inverse_of: :faculty
@@ -9,10 +10,14 @@ class User < ApplicationRecord
   has_many :attendances, foreign_key: :student_id, dependent: :destroy, inverse_of: :student
   has_many :attended_sessions, through: :attendances, source: :class_session
   has_many :submissions, foreign_key: :student_id, dependent: :destroy, inverse_of: :student
+  has_many :placement_applications, dependent: :destroy
+  has_many :applied_placement_drives, through: :placement_applications, source: :placement_drive
 
   validates :name, presence: true
   validates :email, presence: true, uniqueness: { case_sensitive: false }, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :role, presence: true, inclusion: { in: ROLES }
+  validates :cgpa, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 10.0 }, allow_nil: true
+  validates :backlogs_count, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   scope :students, -> { where(role: "student") }
   scope :faculty_members, -> { where(role: "faculty") }
@@ -23,11 +28,14 @@ class User < ApplicationRecord
   def faculty? = role == "faculty"
   def admin? = role == "admin"
   def staff? = role == "staff"
+  def backlogs = backlogs_count
+  def backlogs=(value)
+    self.backlogs_count = value
+  end
 
   def attendance_percentage_for(course)
     total_sessions = course.class_sessions.count
     return 100.0 if total_sessions.zero?
-
     attended = attendances.joins(:class_session).where(class_sessions: { course_id: course.id }).count
     ((attended.to_f / total_sessions) * 100).round(1)
   end
@@ -44,7 +52,6 @@ class User < ApplicationRecord
   def overall_attendance_percentage
     relevant_sessions = ClassSession.where(course_id: enrolled_course_ids).count
     return 100.0 if relevant_sessions.zero?
-
     ((attendances.count.to_f / relevant_sessions) * 100).round(1)
   end
 end

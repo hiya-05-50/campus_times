@@ -1,0 +1,45 @@
+<div class="placement-container">
+  <%= stylesheet_link_tag "placements", "data-turbo-track": "reload" %>
+
+  <% if notice.present? %>
+    <div class="flash-notice"><%= notice %></div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= link_to "← Back to Placement Drives", placement_drives_path, class: "placement-btn placement-btn-secondary" %>
+  </div>
+
+  <div class="placement-header">
+    <div>
+      <h1>Partner Companies</h1>
+      <div class="subtitle">Recruiting organizations registered on campus.</div>
+    </div>
+    <% if admin_user? %>
+      <div>
+        <%= link_to "+ Add Company", new_company_path, class: "placement-btn placement-btn-primary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="placement-grid">
+    <% @companies.each do |company| %>
+      <div class="placement-card">
+        <div>
+          <h3 class="company-title"><%= company.name %></h3>
+          <div style="font-size: 0.85rem; color: var(--placement-primary); margin: 0.25rem 0;">
+            <%= company.industry.presence || "General" %> | <%= company.location.presence || "India" %>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--placement-gray-700); margin-top: 0.5rem;">
+            <%= truncate(company.description, length: 120) %>
+          </p>
+        </div>
+        <div class="placement-card-footer">
+          <span style="font-size: 0.8rem; color: var(--placement-gray-600);">
+            <%= pluralize(company.placement_drives.count, "drive") %>
+          </span>
+          <%= link_to "View Details", company_path(company), class: "placement-btn placement-btn-secondary" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

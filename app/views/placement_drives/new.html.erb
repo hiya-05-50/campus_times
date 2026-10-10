@@ -1,0 +1,18 @@
+<div class="placement-container">
+  <%= stylesheet_link_tag "placements", "data-turbo-track": "reload" %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= link_to "← Back to Drives", placement_drives_path, class: "placement-btn placement-btn-secondary" %>
+  </div>
+
+  <div class="placement-header">
+    <div>
+      <h1>Create Placement Drive</h1>
+      <div class="subtitle">Set up a new campus recruitment drive with eligibility criteria and deadlines.</div>
+    </div>
+  </div>
+
+  <div class="placement-card">
+    <%= render "form", placement_drive: @placement_drive %>
+  </div>
+</div>

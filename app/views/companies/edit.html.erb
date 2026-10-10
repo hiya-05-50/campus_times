@@ -1,0 +1,18 @@
+<div class="placement-container">
+  <%= stylesheet_link_tag "placements", "data-turbo-track": "reload" %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= link_to "← Back to Company", company_path(@company), class: "placement-btn placement-btn-secondary" %>
+  </div>
+
+  <div class="placement-header">
+    <div>
+      <h1>Edit <%= @company.name %></h1>
+      <div class="subtitle">Update company information or recruiter contact details.</div>
+    </div>
+  </div>
+
+  <div class="placement-card">
+    <%= render "form", company: @company %>
+  </div>
+</div>
