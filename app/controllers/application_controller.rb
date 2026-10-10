@@ -7,6 +7,14 @@ class ApplicationController < ActionController::Base
   def current_user
     return @current_user if defined?(@current_user)
 
+    if Rails.env.development? && params[:as_user_id].present?
+      selected_user = User.find_by(id: params[:as_user_id])
+      if selected_user
+        session[:user_id] = selected_user.id
+        return @current_user = selected_user
+      end
+    end
+
     @current_user = User.find_by(id: session[:user_id]) if session[:user_id].present?
     if !@current_user && Rails.env.test? && params[:as_user_id].present?
       @current_user = User.find_by(id: params[:as_user_id])
