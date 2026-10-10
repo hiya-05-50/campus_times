@@ -1,0 +1,100 @@
+<%= form_with model: placement_drive, local: true do |f| %>
+  <% if placement_drive.errors.any? %>
+    <div class="flash-alert">
+      <h4><%= pluralize(placement_drive.errors.count, "error") %> prohibited this placement drive from being saved:</h4>
+      <ul>
+        <% placement_drive.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+    <div>
+      <%= f.label :company_id, "Company *", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.collection_select :company_id, @companies, :id, :name, { prompt: "Select a company" }, { style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" } %>
+    </div>
+    <div>
+      <%= f.label :title, "Drive Title *", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.text_field :title, placeholder: "e.g. SDE Recruitment 2026", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+    <div>
+      <%= f.label :job_role, "Job Role *", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.text_field :job_role, placeholder: "e.g. Software Engineer", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+    <div>
+      <%= f.label :employment_type, "Employment Type", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.select :employment_type, ["Full-time", "Internship", "Intern + Full-time", "Contract"], {}, { style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" } %>
+    </div>
+    <div>
+      <%= f.label :ctc_or_stipend, "CTC / Stipend", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.text_field :ctc_or_stipend, placeholder: "e.g. 14 LPA", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+    <div>
+      <%= f.label :job_location, "Location", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.text_field :job_location, placeholder: "e.g. Bengaluru / Hyderabad / Remote", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+    <div>
+      <%= f.label :status, "Status", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.select :status, PlacementDrive::STATUSES.map { |s| [s.capitalize, s] }, {}, { style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" } %>
+    </div>
+  </div>
+
+  <div style="background-color: var(--placement-gray-50); padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--placement-gray-200);">
+    <h4 style="margin: 0 0 0.75rem 0;">Eligibility Criteria</h4>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+      <div>
+        <%= f.label :minimum_cgpa, "Minimum CGPA *", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+        <%= f.number_field :minimum_cgpa, step: 0.1, min: 0, max: 10, style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+      </div>
+      <div>
+        <%= f.label :maximum_backlogs, "Maximum Backlogs Allowed *", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+        <%= f.number_field :maximum_backlogs, min: 0, style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+      </div>
+      <div>
+        <%= f.label :graduation_year, "Target Batch (Year) *", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+        <%= f.number_field :graduation_year, min: 2020, max: 2035, style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+      </div>
+    </div>
+
+    <div style="margin-top: 1rem;">
+      <%= f.label :department_ids, "Eligible Departments (leave unchecked for all departments):", style: "display: block; font-weight: 600; margin-bottom: 0.5rem;" %>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <%= f.collection_check_boxes :department_ids, @departments, :id, :name do |b| %>
+          <label style="display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; cursor: pointer;">
+            <%= b.check_box %>
+            <%= b.text %>
+          </label>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+    <div>
+      <%= f.label :application_deadline, "Application Deadline *", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.datetime_local_field :application_deadline, style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+    <div>
+      <%= f.label :drive_date, "Interview / Drive Date", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.datetime_local_field :drive_date, style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <%= f.label :job_description, "Job Description & Instructions", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+    <%= f.text_area :job_description, rows: 4, placeholder: "Role responsibilities, qualification details, interview rounds...", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+  </div>
+
+  <div style="display: flex; gap: 1rem;">
+    <%= f.submit class: "placement-btn placement-btn-primary" %>
+    <%= link_to "Cancel", placement_drives_path, class: "placement-btn placement-btn-secondary" %>
+  </div>
+<% end %>

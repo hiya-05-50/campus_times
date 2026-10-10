@@ -1,0 +1,54 @@
+<%= form_with model: company, local: true do |f| %>
+  <% if company.errors.any? %>
+    <div class="flash-alert">
+      <h4><%= pluralize(company.errors.count, "error") %> prohibited this company from being saved:</h4>
+      <ul>
+        <% company.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :name, "Company Name *", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+    <%= f.text_field :name, placeholder: "e.g. Acme Corporation", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+    <div>
+      <%= f.label :industry, "Industry", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.text_field :industry, placeholder: "e.g. Technology / FinTech", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+    <div>
+      <%= f.label :location, "Headquarters / Location", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.text_field :location, placeholder: "e.g. Bengaluru, Karnataka", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+    <div>
+      <%= f.label :website, "Website URL", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.url_field :website, placeholder: "https://example.com", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+    <div>
+      <%= f.label :contact_email, "Recruiter Email", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+      <%= f.email_field :contact_email, placeholder: "recruiter@example.com", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 1rem;">
+    <%= f.label :contact_person, "Contact Person", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+    <%= f.text_field :contact_person, placeholder: "e.g. John Doe, Campus Talent Lead", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <%= f.label :description, "Company Description", style: "display: block; font-weight: 600; margin-bottom: 0.3rem;" %>
+    <%= f.text_area :description, rows: 4, placeholder: "Brief summary about company mission, engineering culture, and work...", style: "width: 100%; padding: 0.5rem; border: 1px solid var(--placement-gray-200); border-radius: 6px;" %>
+  </div>
+
+  <div style="display: flex; gap: 1rem;">
+    <%= f.submit class: "placement-btn placement-btn-primary" %>
+    <%= link_to "Cancel", companies_path, class: "placement-btn placement-btn-secondary" %>
+  </div>
+<% end %>

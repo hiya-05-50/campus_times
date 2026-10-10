@@ -1,0 +1,111 @@
+<div class="placement-container">
+  <%= stylesheet_link_tag "placements", "data-turbo-track": "reload" %>
+
+  <% if notice.present? %>
+    <div class="flash-notice"><%= notice %></div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="flash-alert"><%= alert %></div>
+  <% end %>
+
+  <div style="margin-bottom: 1rem;">
+    <%= link_to "← Back to Placement Drives", placement_drives_path, class: "placement-btn placement-btn-secondary" %>
+  </div>
+
+  <div class="placement-header">
+    <div>
+      <h1><%= admin_user? ? "Manage Placement Applications" : "My Placement Applications" %></h1>
+      <div class="subtitle">
+        <%= admin_user? ? "Review all submitted student applications and update selection statuses." : "Track your submitted recruitment applications and monitor interview statuses." %>
+      </div>
+    </div>
+  </div>
+
+  <% if @placement_applications.empty? %>
+    <div class="placement-card placement-empty">
+      <h3>No applications found</h3>
+      <p>
+        <%= admin_user? ? "No applications have been submitted by students yet." : "You have not submitted any placement applications yet." %>
+      </p>
+      <%= link_to "Browse Open Placement Drives", placement_drives_path, class: "placement-btn placement-btn-primary" %>
+    </div>
+  <% else %>
+    <div class="placement-card">
+      <div style="overflow-x: auto;">
+        <table class="placement-table">
+          <thead>
+            <tr>
+              <% if admin_user? %>
+                <th>Student</th>
+                <th>Dept / CGPA</th>
+              <% end %>
+              <th>Company & Drive</th>
+              <th>Role</th>
+              <th>Applied Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @placement_applications.each do |application| %>
+              <tr>
+                <% if admin_user? %>
+                  <td>
+                    <strong><%= application.user.name %></strong>
+                    <div style="font-size: 0.75rem; color: var(--placement-gray-600);"><%= application.user.email %></div>
+                  </td>
+                  <td>
+                    <%= application.user.department&.code || application.user.department&.name || "N/A" %>
+                    | CGPA: <%= application.user.cgpa %>
+                  </td>
+                <% end %>
+                <td>
+                  <strong><%= application.placement_drive.company.name %></strong>
+                  <div style="font-size: 0.8rem; color: var(--placement-gray-600);"><%= application.placement_drive.title %></div>
+                </td>
+                <td><%= application.placement_drive.job_role %></td>
+                <td><%= application.applied_at&.strftime("%b %d, %Y") || application.created_at.strftime("%b %d, %Y") %></td>
+                <td>
+                  <span class="placement-badge badge-<%= application.status %>">
+                    <%= application.status.capitalize %>
+                  </span>
+                  <% if application.withdrawn? %>
+                    <div style="font-size: 0.75rem; color: var(--placement-gray-600); margin-top: 0.2rem;">
+                      on <%= application.withdrawn_at&.strftime("%b %d") %>
+                    </div>
+                  <% end %>
+                </td>
+                <td>
+                  <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <%= link_to "View Drive", placement_drive_path(application.placement_drive), class: "placement-btn placement-btn-secondary", style: "padding: 0.3rem 0.6rem; font-size: 0.8rem;" %>
+
+                    <% if student_user? && application.can_withdraw? %>
+                      <%= button_to "Withdraw",
+                                    withdraw_placement_application_path(application),
+                                    method: :patch,
+                                    data: { turbo_confirm: "Are you sure you want to withdraw your application?" },
+                                    class: "placement-btn placement-btn-danger",
+                                    style: "padding: 0.3rem 0.6rem; font-size: 0.8rem;" %>
+                    <% end %>
+
+                    <% if admin_user? %>
+                      <%= form_with model: application, url: placement_application_path(application), method: :patch, local: true do |f| %>
+                        <div style="display: flex; gap: 0.25rem;">
+                          <%= f.select :status,
+                                       PlacementApplication::STATUSES.map { |s| [s.capitalize, s] },
+                                       {},
+                                       { style: "padding: 0.25rem 0.4rem; font-size: 0.75rem; border-radius: 4px; border: 1px solid var(--placement-gray-200);" } %>
+                          <%= f.submit "Update", class: "placement-btn placement-btn-primary", style: "padding: 0.25rem 0.4rem; font-size: 0.75rem;" %>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+</div>
