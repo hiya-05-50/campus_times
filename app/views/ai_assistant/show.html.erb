@@ -8,7 +8,7 @@
     </header>
 
     <div class="ai-conversation" aria-live="polite" aria-label="Conversation">
-      <article class="ai-message ai-message-assistant"><span class="ai-avatar">✦</span><p>Hi<%= " #{current_user.respond_to?(:name) ? current_user.name.to_s.split.first : "there"}" %>! Ask me about your campus day. I’ll only use information available to your account.</p></article>
+      <article class="ai-message ai-message-assistant"><span class="ai-avatar">✦</span><p>Hi <%= @assistant_user.respond_to?(:name) ? @assistant_user.name.to_s.split.first : "there" %>! Ask me about your campus day. I’ll only use information available to your account.</p></article>
       <% @messages.each do |message| %>
         <article class="ai-message <%= message["role"] == "user" ? "ai-message-user" : "ai-message-assistant" %>"><p><%= message["content"] %></p></article>
       <% end %>
