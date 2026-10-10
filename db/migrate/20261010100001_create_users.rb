@@ -6,7 +6,6 @@ class CreateUsers < ActiveRecord::Migration[8.1]
       t.string :role, null: false, default: "student"
       t.string :department
       t.string :roll_number
-
       t.timestamps
     end
 

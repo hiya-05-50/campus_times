@@ -1,0 +1,29 @@
+student_john:
+  name: John Student
+  email: john@example.com
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  role: student
+
+student_jane:
+  name: Jane Student
+  email: jane@example.com
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  role: student
+
+faculty_alice:
+  name: Alice Faculty
+  email: alice@example.com
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  role: faculty
+
+faculty_bob:
+  name: Bob Faculty
+  email: bob@example.com
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  role: faculty
+
+admin_carol:
+  name: Carol Admin
+  email: carol@example.com
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  role: admin

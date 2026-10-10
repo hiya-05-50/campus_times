@@ -2,30 +2,35 @@
 
 # Users (All 4 roles: student, faculty, admin, staff)
 admin = User.find_or_create_by!(email: "admin@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Dr. Eleanor Vance"
   u.role = "admin"
   u.department = "Academic Administration"
 end
 
 faculty1 = User.find_or_create_by!(email: "sharma@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Prof. Ramesh Sharma"
   u.role = "faculty"
   u.department = "Computer Science"
 end
 
 faculty2 = User.find_or_create_by!(email: "gupta@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Prof. Anita Gupta"
   u.role = "faculty"
   u.department = "Information Technology"
 end
 
 staff = User.find_or_create_by!(email: "staff@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Rajesh Verma"
   u.role = "staff"
   u.department = "Campus Facilities & Student Services"
 end
 
 student1 = User.find_or_create_by!(email: "devesh@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Devesh Bhavsar"
   u.role = "student"
   u.department = "Computer Science"
@@ -33,6 +38,7 @@ student1 = User.find_or_create_by!(email: "devesh@campus.edu") do |u|
 end
 
 student2 = User.find_or_create_by!(email: "hiya@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Hiya Patel"
   u.role = "student"
   u.department = "Computer Science"
@@ -40,6 +46,7 @@ student2 = User.find_or_create_by!(email: "hiya@campus.edu") do |u|
 end
 
 student3 = User.find_or_create_by!(email: "aditya@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Aditya Kumar"
   u.role = "student"
   u.department = "Information Technology"
@@ -47,6 +54,7 @@ student3 = User.find_or_create_by!(email: "aditya@campus.edu") do |u|
 end
 
 student4 = User.find_or_create_by!(email: "siddhant@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Siddhant Joshi"
   u.role = "student"
   u.department = "Computer Science"
@@ -54,6 +62,7 @@ student4 = User.find_or_create_by!(email: "siddhant@campus.edu") do |u|
 end
 
 student5 = User.find_or_create_by!(email: "hussain@campus.edu") do |u|
+  u.password = SecureRandom.hex(32)
   u.name = "Hussain Patanwala"
   u.role = "student"
   u.department = "Computer Science"

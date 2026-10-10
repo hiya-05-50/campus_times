@@ -8,4 +8,5 @@ class Enrollment < ApplicationRecord
     scope: %i[course_id academic_year],
     message: "is already enrolled in this course for this academic year"
   }
+  validates :status, inclusion: { in: %w[active dropped] }, allow_nil: true
 end

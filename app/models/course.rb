@@ -3,6 +3,7 @@ class Course < ApplicationRecord
   has_many :enrollments, dependent: :destroy
   has_many :students, through: :enrollments, source: :user
   has_many :class_sessions, dependent: :destroy
+  has_many :assignments, dependent: :destroy
 
   validates :name, presence: true
   validates :code, presence: true, uniqueness: { case_sensitive: false }

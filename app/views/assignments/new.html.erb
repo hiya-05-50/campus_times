@@ -1,0 +1,11 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "assignments", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="page-container">
+  <a href="<%= course_assignments_path(@course) %>" class="back-link">← Back to Assignments</a>
+  <h1 class="page-title">New Assignment</h1>
+  <p class="page-subtitle"><%= @course.name %> (<%= @course.code %>)</p>
+
+  <%= render "form" %>
+</div>

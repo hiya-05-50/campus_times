@@ -1,0 +1,6 @@
+john_ruby_submission:
+  assignment: published_ruby_assignment
+  student: student_john
+  marks:
+  feedback:
+  submitted_at: <%= 1.day.ago.to_fs(:db) %>

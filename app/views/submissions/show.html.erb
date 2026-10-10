@@ -1,0 +1,82 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "assignments", "data-turbo-track": "reload" %>
+<% end %>
+
+<div class="page-container">
+  <% if flash[:notice] %>
+    <div class="flash-notice"><%= flash[:notice] %></div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="flash-alert"><%= flash[:alert] %></div>
+  <% end %>
+
+  <a href="<%= course_assignment_path(@course, @assignment) %>" class="back-link">← Back to Assignment</a>
+  <h1 class="page-title">Submission Details</h1>
+  <p class="page-subtitle"><%= @assignment.title %> — <%= @course.name %></p>
+
+  <div class="submission-detail-card">
+    <div class="detail-section">
+      <h2 class="section-title">Submission Information</h2>
+      <div class="detail-meta">
+        <div class="meta-item"><strong>Student:</strong> <%= @submission.student.name %></div>
+        <div class="meta-item"><strong>Submitted:</strong> <%= @submission.submitted_at&.strftime("%B %d, %Y at %I:%M %p") || "N/A" %></div>
+        <% if @submission.file.attached? %>
+          <div class="meta-item">
+            <strong>File:</strong> <%= @submission.file.filename %>
+            (<%= number_to_human_size(@submission.file.byte_size) %>)
+            <% if current_user.faculty? || @submission.student_id == current_user.id %>
+              — <%= link_to "Download", rails_blob_path(@submission.file, disposition: "attachment"), class: "link" %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="meta-item"><strong>File:</strong> <span class="text-muted">No file attached</span></div>
+        <% end %>
+      </div>
+    </div>
+
+    <% if @submission.marks.present? || @submission.feedback.present? %>
+      <div class="detail-section">
+        <h2 class="section-title">Grading</h2>
+        <% if @submission.marks.present? %>
+          <p class="grade-display"><strong>Marks:</strong> <%= @submission.marks %> / <%= @assignment.max_marks %></p>
+        <% end %>
+        <% if @submission.feedback.present? %>
+          <div class="feedback-box">
+            <strong>Feedback:</strong>
+            <%= simple_format(@submission.feedback) %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Faculty Grading Form %>
+    <% if current_user.faculty? && @course.faculty_id == current_user.id %>
+      <div class="detail-section">
+        <h2 class="section-title"><%= @submission.marks.present? ? "Update Grade" : "Grade Submission" %></h2>
+        <%= form_with url: course_assignment_submission_path(@course, @assignment, @submission), method: :patch, class: "resource-form" do |f| %>
+          <div class="form-row">
+            <div class="form-group form-group-half">
+              <label for="submission_marks" class="form-label">Marks (out of <%= @assignment.max_marks %>)</label>
+              <input type="number" name="submission[marks]" id="submission_marks"
+                     value="<%= @submission.marks %>"
+                     class="form-input" min="0" max="<%= @assignment.max_marks %>" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="submission_feedback" class="form-label">Feedback</label>
+            <textarea name="submission[feedback]" id="submission_feedback"
+                      class="form-input form-textarea" rows="4"
+                      placeholder="Provide feedback to the student..."><%= @submission.feedback %></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+              <%= @submission.marks.present? ? "Update Grade" : "Submit Grade" %>
+            </button>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
