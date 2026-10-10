@@ -1,0 +1,57 @@
+<% content_for :title, "Courses - Campus Times" %>
+<% content_for :head do %>
+  <%= stylesheet_link_tag "courses", "data-turbo-track": "reload" %>
+<% end %>
+
+<main class="courses-shell">
+  <div class="courses-panel">
+    
+    <% if notice.present? %>
+      <div class="courses-notice" id="notice">
+        <span>✓</span> <%= notice %>
+      </div>
+    <% end %>
+
+    <header class="courses-header">
+      <div>
+        <p class="courses-eyebrow">CAMPUS TIMES</p>
+        <h1>Campus Courses</h1>
+        <p>Explore departments, view syllabi, and manage course enrollments.</p>
+      </div>
+      <div>
+        <%= link_to new_course_path, class: "btn-primary" do %>
+          <span>+</span> New Course
+        <% end %>
+      </div>
+    </header>
+
+    <% if @courses.any? %>
+      <div class="courses-grid">
+        <% @courses.each do |course| %>
+          <article class="course-card">
+            <div class="course-card-top">
+              <span class="course-badge"><%= course.code %></span>
+              <h2><%= course.name %></h2>
+              <p><%= truncate(course.description.presence || "No course description provided.", length: 110) %></p>
+            </div>
+            
+            <div class="course-card-bottom">
+              <span class="course-meta">
+                Faculty: <%= course.faculty_id.present? ? "ID ##{course.faculty_id}" : "Unassigned" %>
+              </span>
+              <%= link_to "→", course, class: "course-arrow-btn", title: "View course" %>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="courses-empty">
+        <span class="courses-empty-icon">📚</span>
+        <h3>No courses published yet</h3>
+        <p>Get started by adding the very first course to the campus catalog.</p>
+        <%= link_to "Add First Course", new_course_path, class: "btn-primary" %>
+      </div>
+    <% end %>
+
+  </div>
+</main>
