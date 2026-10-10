@@ -1,25 +1,57 @@
-<div class="w-full">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-lg inline-block" id="notice"><%= notice %></p>
-  <% end %>
+<% content_for :title, "Courses - Campus Times" %>
+<% content_for :head do %>
+  <%= stylesheet_link_tag "courses", "data-turbo-track": "reload" %>
+<% end %>
 
-  <div class="flex justify-between items-center">
-    <h1 class="font-bold text-4xl">Courses</h1>
-    <%= link_to "New course", new_course_path, class: "rounded-lg py-3 px-5 bg-blue-600 text-white block font-medium" %>
-  </div>
-
-  <div id="courses" class="min-w-full">
-    <% @courses.each do |course| %>
-      <div class="bg-white shadow rounded-lg p-6 mt-4">
-        <h2 class="text-2xl font-semibold"><%= course.name %> (<%= course.code %>)</h2>
-        <p class="text-gray-600 mt-2"><%= truncate(course.description, length: 100) %></p>
-        <p class="mt-2 text-sm text-gray-500">
-          Faculty: <%= course.faculty ? course.faculty.email : "Not Assigned" %>
-        </p>
-        <div class="mt-4">
-          <%= link_to "Show this course", course, class: "rounded-lg py-2 px-4 bg-gray-100 text-black inline-block font-medium" %>
-        </div>
+<main class="courses-shell">
+  <div class="courses-panel">
+    
+    <% if notice.present? %>
+      <div class="courses-notice" id="notice">
+        <span>✓</span> <%= notice %>
       </div>
     <% end %>
+
+    <header class="courses-header">
+      <div>
+        <p class="courses-eyebrow">CAMPUS TIMES</p>
+        <h1>Campus Courses</h1>
+        <p>Explore departments, view syllabi, and manage course enrollments.</p>
+      </div>
+      <div>
+        <%= link_to new_course_path, class: "btn-primary" do %>
+          <span>+</span> New Course
+        <% end %>
+      </div>
+    </header>
+
+    <% if @courses.any? %>
+      <div class="courses-grid">
+        <% @courses.each do |course| %>
+          <article class="course-card">
+            <div class="course-card-top">
+              <span class="course-badge"><%= course.code %></span>
+              <h2><%= course.name %></h2>
+              <p><%= truncate(course.description.presence || "No course description provided.", length: 110) %></p>
+            </div>
+            
+            <div class="course-card-bottom">
+              <span class="course-meta">
+                Faculty: <%= course.faculty_id.present? ? "ID ##{course.faculty_id}" : "Unassigned" %>
+              </span>
+              <%= link_to "→", course, class: "course-arrow-btn", title: "View course" %>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="courses-empty">
+        <span class="courses-empty-icon">📚</span>
+        <h3>No courses published yet</h3>
+        <p>Get started by adding the very first course to the campus catalog.</p>
+        <%= link_to "Add First Course", new_course_path, class: "btn-primary" %>
+      </div>
+    <% end %>
+
   </div>
-</div>
+</main>
