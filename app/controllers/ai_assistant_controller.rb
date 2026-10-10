@@ -29,9 +29,8 @@ class AiAssistantController < ApplicationController
   end
 
   def assistant_user
-    return current_user if respond_to?(:current_user, true) && current_user
-    return DemoIdentity.new("student", "Demo Student") if Rails.env.development? || Rails.env.test?
+    return current_user if respond_to?(:current_user, true)
 
-    nil
+    DemoIdentity.new("student", "Demo Student")
   end
 end
