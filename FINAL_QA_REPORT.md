@@ -16,7 +16,7 @@ Integration branch: `integration/final-qa`
 
 - Tests were not run, as requested.
 - Branch conflict markers were checked and removed; `git diff --cached --check` was clean before the integration commits.
-- The test-database migration was interrupted. A complete migration run and test suite remain unverified.
+- Integration migrations are ordered after the checked-in attendance schema version so a fresh `db:prepare` will apply them. A local migration run could not complete because `bcrypt` is not installed in the workspace; the test suite was not run.
 
 ## Integration commits
 
