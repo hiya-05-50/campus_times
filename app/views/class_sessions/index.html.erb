@@ -1,0 +1,86 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "attendance" %>
+<% end %>
+
+<div class="container">
+  <div class="header-bar">
+    <div>
+      <h1 class="title">Class Attendance Sessions</h1>
+      <p class="subtitle">Monitor lectures, live attendance turnout, and open sessions.</p>
+    </div>
+    <div>
+      <% if current_user.faculty? || current_user.admin? %>
+        <%= link_to "+ Open New Attendance Session", new_class_session_path, class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if notice.present? %>
+    <div class="alert alert-success">
+      <span><%= notice %></span>
+    </div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="alert alert-danger">
+      <span><%= alert %></span>
+    </div>
+  <% end %>
+
+  <% if @class_sessions.any? %>
+    <div class="grid grid-cols-2">
+      <% @class_sessions.each do |session| %>
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div>
+              <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem;"><%= session.course.code %></span>
+              <h2 class="card-title" style="margin: 4px 0;"><%= session.course.name %></h2>
+              <div style="font-size: 0.85rem; color: var(--gray-600);"><%= session.topic.presence || "Regular Lecture" %></div>
+            </div>
+            <div>
+              <% if session.open? %>
+                <span class="badge badge-open">Open (<%= session.seconds_remaining / 60 %>m left)</span>
+              <% elsif session.closed? %>
+                <span class="badge badge-closed">Closed</span>
+              <% else %>
+                <span class="badge badge-danger">Expired</span>
+              <% end %>
+            </div>
+          </div>
+
+          <div style="margin: 16px 0; display: flex; gap: 20px; align-items: baseline;">
+            <div>
+              <span class="metric-number" style="font-size: 1.75rem;"><%= session.present_count %></span>
+              <span style="color: var(--gray-600); font-size: 1rem;">/ <%= session.enrolled_count %></span>
+              <div class="metric-label">Students Present</div>
+            </div>
+            <div>
+              <span class="metric-number" style="font-size: 1.75rem; color: <%= session.attendance_percentage >= 75.0 ? 'var(--success)' : 'var(--warning)' %>;">
+                <%= session.attendance_percentage %>%
+              </span>
+              <div class="metric-label">Turnout Rate</div>
+            </div>
+          </div>
+
+          <div class="progress-bar">
+            <div class="progress-fill <%= session.attendance_percentage >= 75.0 ? 'good' : 'warning' %>" style="width: <%= [session.attendance_percentage, 100].min %>%;"></div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: 0.85rem; color: var(--gray-600);">
+            <span><%= session.starts_at.strftime("%b %d, %Y at %I:%M %p") %></span>
+            <%= link_to "View Session Details →", class_session_path(session), class: "btn btn-secondary", style: "padding: 6px 12px; font-size: 0.85rem;" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h3>No attendance sessions found</h3>
+      <p>There are no active or past class sessions to display right now.</p>
+      <% if current_user.faculty? || current_user.admin? %>
+        <%= link_to "+ Open Your First Session", new_class_session_path, class: "btn btn-primary", style: "margin-top: 12px;" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

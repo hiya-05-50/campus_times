@@ -1,0 +1,244 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "attendance" %>
+<% end %>
+
+<div class="container">
+  <div class="header-bar">
+    <div>
+      <h1 class="title"><%= current_user.student? ? "My Attendance Records" : "Attendance Oversight" %></h1>
+      <p class="subtitle">
+        <%= current_user.student? ? "Track your lecture attendance, course percentages, and academic standing." : "Monitor campus-wide student attendance, course turnout, and at-risk students." %>
+      </p>
+    </div>
+    <div>
+      <% if current_user.faculty? || current_user.admin? %>
+        <%= link_to "Manage Class Sessions", class_sessions_path, class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if notice.present? %>
+    <div class="alert alert-success">
+      <span><%= notice %></span>
+    </div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="alert alert-danger">
+      <span><%= alert %></span>
+    </div>
+  <% end %>
+
+  <% if current_user.student? %>
+    <% if @low_attendance_courses.any? %>
+      <div class="alert alert-warning">
+        <div style="font-size: 1.5rem;">⚠️</div>
+        <div>
+          <strong style="font-size: 1.05rem;">Low Attendance Warning</strong>
+          <p style="margin: 4px 0 0; font-size: 0.9rem;">
+            Your attendance has dropped below <strong>75%</strong> in:
+            <strong><%= @low_attendance_courses.map { |c| "#{c.name} (#{current_user.attendance_percentage_for(c)}%)" }.join(", ") %></strong>.
+            Please attend upcoming classes to avoid academic penalties or examination debarment.
+          </p>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="grid grid-cols-3" style="margin-bottom: 24px;">
+      <div class="card">
+        <div class="card-title">Overall Attendance</div>
+        <div class="metric-number" style="color: <%= @overall_percentage >= 75.0 ? 'var(--success)' : 'var(--danger)' %>;">
+          <%= @overall_percentage %>%
+        </div>
+        <div class="metric-label">All Enrolled Courses</div>
+        <div class="progress-bar">
+          <div class="progress-fill <%= @overall_percentage >= 75.0 ? 'good' : 'warning' %>" style="width: <%= [@overall_percentage, 100].min %>%;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Classes Attended</div>
+        <div class="metric-number"><%= @attendances.count %></div>
+        <div class="metric-label">Total Verified Attendances</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Enrolled Courses</div>
+        <div class="metric-number"><%= @courses.count %></div>
+        <div class="metric-label">Active This Semester</div>
+      </div>
+    </div>
+
+    <h2 style="font-size: 1.3rem; font-weight: 700; margin: 24px 0 16px; color: var(--gray-900);">Course-Wise Breakdown</h2>
+    <% if @courses.any? %>
+      <div class="grid grid-cols-2" style="margin-bottom: 32px;">
+        <% @courses.each do |course| %>
+          <% pct = current_user.attendance_percentage_for(course) %>
+          <% attended = current_user.attendances.joins(:class_session).where(class_sessions: { course_id: course.id }).count %>
+          <% total = course.class_sessions.count %>
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <span style="font-weight: 700; color: var(--primary); font-size: 0.85rem;"><%= course.code %></span>
+                <h3 class="card-title" style="margin: 4px 0 8px;"><%= course.name %></h3>
+                <div style="font-size: 0.85rem; color: var(--gray-600);"><%= course.department %> · <%= course.credits %> Credits</div>
+              </div>
+              <div>
+                <% if total > 0 && pct < 75.0 %>
+                  <span class="badge badge-danger">Low Attendance</span>
+                <% else %>
+                  <span class="badge badge-success">Good Standing</span>
+                <% end %>
+              </div>
+            </div>
+
+            <div style="margin: 16px 0 8px; display: flex; justify-content: space-between; align-items: baseline;">
+              <div>
+                <span style="font-size: 1.5rem; font-weight: 700; color: <%= pct >= 75.0 ? 'var(--success)' : 'var(--danger)' %>;"><%= pct %>%</span>
+                <span style="color: var(--gray-600); font-size: 0.85rem;">(<%= attended %> of <%= total %> sessions)</span>
+              </div>
+            </div>
+
+            <div class="progress-bar">
+              <div class="progress-fill <%= pct >= 75.0 ? 'good' : 'warning' %>" style="width: <%= [pct, 100].min %>%;"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="empty-state" style="margin-bottom: 32px;">
+        <div class="empty-state-icon">📚</div>
+        <h3>No courses enrolled</h3>
+        <p>You are not currently enrolled in any courses for this academic term.</p>
+      </div>
+    <% end %>
+
+    <h2 style="font-size: 1.3rem; font-weight: 700; margin: 24px 0 16px; color: var(--gray-900);">Recent Attendance Logs</h2>
+    <div class="table-responsive">
+      <% if @attendances.any? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Course</th>
+              <th>Session Topic</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @attendances.each do |attendance| %>
+              <tr>
+                <td><%= attendance.marked_at.strftime("%b %d, %Y at %I:%M %p") %></td>
+                <td>
+                  <strong><%= attendance.class_session.course.code %></strong>
+                  <div style="font-size: 0.8rem; color: var(--gray-600);"><%= attendance.class_session.course.name %></div>
+                </td>
+                <td><%= attendance.class_session.topic.presence || "Regular Session" %></td>
+                <td><span class="badge badge-success">Present</span></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="empty-state">
+          <p style="margin: 0;">No attendance records found yet.</p>
+        </div>
+      <% end %>
+    </div>
+
+  <% else %>
+    <!-- Faculty / Admin Overview -->
+    <div class="grid grid-cols-3" style="margin-bottom: 24px;">
+      <div class="card">
+        <div class="card-title">Managed Courses</div>
+        <div class="metric-number"><%= @courses.count %></div>
+        <div class="metric-label">Active Courses</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent Sessions</div>
+        <div class="metric-number"><%= @class_sessions.count %></div>
+        <div class="metric-label">Sessions Conducted</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Students at Attendance Risk</div>
+        <div class="metric-number" style="color: <%= @students_at_risk.any? ? 'var(--danger)' : 'var(--success)' %>;">
+          <%= @students_at_risk.count %>
+        </div>
+        <div class="metric-label">Below 75% Threshold</div>
+      </div>
+    </div>
+
+    <% if @students_at_risk.any? %>
+      <div class="card" style="margin-bottom: 24px; border-left: 4px solid var(--danger);">
+        <h3 class="card-title" style="color: var(--danger);">⚠️ Students Requiring Immediate Attention</h3>
+        <p style="font-size: 0.9rem; color: var(--gray-600); margin-bottom: 16px;">The following students are currently below the required 75% attendance threshold in your courses:</p>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Course</th>
+                <th>Current Attendance</th>
+                <th>Action Needed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @students_at_risk.each do |student| %>
+                <% @courses.each do |course| %>
+                  <% if student.low_attendance_for?(course) %>
+                    <tr>
+                      <td>
+                        <strong><%= student.name %></strong>
+                        <div style="font-size: 0.8rem; color: var(--gray-600);"><%= student.email %></div>
+                      </td>
+                      <td><%= course.code %> — <%= course.name %></td>
+                      <td>
+                        <span class="badge badge-danger"><%= student.attendance_percentage_for(course) %>%</span>
+                      </td>
+                      <td style="font-size: 0.85rem; color: var(--danger); font-weight: 500;">Send Attendance Warning Notice</td>
+                    </tr>
+                  <% end %>
+                <% end %>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="table-responsive">
+      <h3 style="padding: 16px 18px 0; margin: 0; font-size: 1.1rem; font-weight: 600;">Recent Verified Attendances</h3>
+      <% if @attendances.any? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Student</th>
+              <th>Course</th>
+              <th>Session Topic</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @attendances.each do |attendance| %>
+              <tr>
+                <td style="font-size: 0.85rem;"><%= attendance.marked_at.strftime("%b %d, %I:%M %p") %></td>
+                <td>
+                  <strong><%= attendance.student.name %></strong>
+                  <div style="font-size: 0.8rem; color: var(--gray-600);"><%= attendance.student.email %></div>
+                </td>
+                <td><%= attendance.class_session.course.code %></td>
+                <td><%= attendance.class_session.topic.presence || "Session" %></td>
+                <td><span class="badge badge-success">Present</span></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <div class="empty-state">
+          <p style="margin: 0;">No attendance records found yet.</p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
