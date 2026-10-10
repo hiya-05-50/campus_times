@@ -16,7 +16,8 @@ Integration branch: `integration/final-qa`
 
 - Tests were not run, as requested.
 - Branch conflict markers were checked and removed; `git diff --cached --check` was clean before the integration commits.
-- Integration migrations are ordered after the checked-in attendance schema version so a fresh `db:prepare` will apply them. A local migration run could not complete because `bcrypt` is not installed in the workspace; the test suite was not run.
+- Integrated migrations completed locally and `db/schema.rb` was regenerated at version `20261010160211`. Demo seed data loaded successfully after aligning user departments with the shared department association.
+- Tests were not run, as requested.
 
 ## Integration commits
 

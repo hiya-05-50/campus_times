@@ -1,39 +1,45 @@
 # Seed data for campus_times
 
+def seed_department(name)
+  Department.find_or_create_by!(name: name) do |department|
+    department.code = name.parameterize.upcase
+  end
+end
+
 # Users (All 4 roles: student, faculty, admin, staff)
 admin = User.find_or_create_by!(email: "admin@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Dr. Eleanor Vance"
   u.role = "admin"
-  u.department = "Academic Administration"
+  u.department = seed_department("Academic Administration")
 end
 
 faculty1 = User.find_or_create_by!(email: "sharma@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Prof. Ramesh Sharma"
   u.role = "faculty"
-  u.department = "Computer Science"
+  u.department = seed_department("Computer Science")
 end
 
 faculty2 = User.find_or_create_by!(email: "gupta@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Prof. Anita Gupta"
   u.role = "faculty"
-  u.department = "Information Technology"
+  u.department = seed_department("Information Technology")
 end
 
 staff = User.find_or_create_by!(email: "staff@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Rajesh Verma"
   u.role = "staff"
-  u.department = "Campus Facilities & Student Services"
+  u.department = seed_department("Campus Facilities & Student Services")
 end
 
 student1 = User.find_or_create_by!(email: "devesh@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Devesh Bhavsar"
   u.role = "student"
-  u.department = "Computer Science"
+  u.department = seed_department("Computer Science")
   u.roll_number = "CS-2024-001"
 end
 
@@ -41,7 +47,7 @@ student2 = User.find_or_create_by!(email: "hiya@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Hiya Patel"
   u.role = "student"
-  u.department = "Computer Science"
+  u.department = seed_department("Computer Science")
   u.roll_number = "CS-2024-002"
 end
 
@@ -49,7 +55,7 @@ student3 = User.find_or_create_by!(email: "aditya@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Aditya Kumar"
   u.role = "student"
-  u.department = "Information Technology"
+  u.department = seed_department("Information Technology")
   u.roll_number = "IT-2024-003"
 end
 
@@ -57,7 +63,7 @@ student4 = User.find_or_create_by!(email: "siddhant@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Siddhant Joshi"
   u.role = "student"
-  u.department = "Computer Science"
+  u.department = seed_department("Computer Science")
   u.roll_number = "CS-2024-004"
 end
 
@@ -65,7 +71,7 @@ student5 = User.find_or_create_by!(email: "hussain@campus.edu") do |u|
   u.password = SecureRandom.hex(32)
   u.name = "Hussain Patanwala"
   u.role = "student"
-  u.department = "Computer Science"
+  u.department = seed_department("Computer Science")
   u.roll_number = "CS-2024-005"
 end
 
