@@ -1,0 +1,37 @@
+<%= form_with(model: course, class: "course-form") do |form| %>
+  <% if course.errors.any? %>
+    <div class="courses-errors">
+      <h2><%= pluralize(course.errors.count, "error") %> prevented this course from being saved:</h2>
+      <ul>
+        <% course.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= form.label :name, "Course Name", class: "form-label" %>
+    <%= form.text_field :name, class: "form-control", placeholder: "e.g. Introduction to Software Engineering", required: true %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :code, "Course Code", class: "form-label" %>
+    <%= form.text_field :code, class: "form-control", placeholder: "e.g. CS101", required: true %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :description, "Description", class: "form-label" %>
+    <%= form.text_area :description, class: "form-control", placeholder: "Describe the course topics, prerequisites, and learning outcomes...", rows: 5 %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :faculty_id, "Faculty Member ID", class: "form-label" %>
+    <%= form.number_field :faculty_id, class: "form-control", placeholder: "Optional faculty ID" %>
+  </div>
+
+  <div class="form-actions">
+    <%= link_to "Cancel", courses_path, class: "btn-secondary" %>
+    <%= form.submit(course.persisted? ? "Update Course" : "Create Course", class: "btn-primary") %>
+  </div>
+<% end %>

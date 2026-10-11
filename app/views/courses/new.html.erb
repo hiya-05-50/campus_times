@@ -1,0 +1,24 @@
+<% content_for :title, "New Course - Campus Times" %>
+<% content_for :head do %>
+  <%= stylesheet_link_tag "courses", "data-turbo-track": "reload" %>
+<% end %>
+
+<main class="courses-shell">
+  <div class="courses-panel" style="max-width: 680px;">
+    
+    <div style="margin-bottom: 20px;">
+      <%= link_to "← Back to courses", courses_path, class: "btn-secondary", style: "font-size: 13px; padding: 7px 14px;" %>
+    </div>
+
+    <header class="courses-header" style="margin-bottom: 28px;">
+      <div>
+        <p class="courses-eyebrow">COURSE CATALOG</p>
+        <h1 style="font-size: 26px;">Create New Course</h1>
+        <p>Add a new course to the campus registry.</p>
+      </div>
+    </header>
+
+    <%= render "form", course: @course %>
+
+  </div>
+</main>
