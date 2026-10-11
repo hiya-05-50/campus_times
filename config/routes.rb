@@ -1,19 +1,20 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
-
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  get "ai-assistant", to: "ai_assistant#show", as: :ai_assistant
-  post "ai-assistant", to: "ai_assistant#create"
-  delete "ai-assistant/reset", to: "ai_assistant#reset", as: :reset_ai_assistant
+  # Dashboards
+  get "dashboard", to: "dashboards#show", as: :dashboard
+  get "admin/overview", to: "dashboards#admin_overview", as: :admin_dashboard_overview
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  resources :courses do
-    resources :enrollments, only: [:create, :destroy]
+  # Attendance & Class Sessions
+  resources :class_sessions, only: %i[index show new create] do
+    member do
+      patch :close
+    end
   end
+
+  resources :attendances, only: %i[index create]
+  get "attendances/mark", to: "attendances#mark", as: :mark_attendance
+  get "class_sessions/:token/attend", to: "attendances#mark", as: :attend_session
+
+  root "dashboards#show"
 end

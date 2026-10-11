@@ -1,0 +1,72 @@
+<!-- Staff Role Dashboard -->
+<div class="grid grid-cols-3" style="margin-bottom: 24px;">
+  <!-- Card 1: Campus Facilities (Links to /facilities) -->
+  <%= link_to "/facilities", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">🏛️ Campus Facilities</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Facilities ↗</span>
+      </div>
+      <div class="metric-number"><%= stats[:facilities][:total_classrooms] %></div>
+      <div class="metric-label">Active Classrooms & Lecture Halls</div>
+      <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        <span>Open Labs: <strong><%= stats[:facilities][:open_labs] %></strong></span> ·
+        <span>Sessions Today: <strong><%= stats[:facilities][:active_sessions_today] %></strong></span>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Card 2: Campus Events (Links to /events) -->
+  <%= link_to "/events", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">📅 Operational Events</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Events ↗</span>
+      </div>
+      <div class="metric-number"><%= stats[:events].size %></div>
+      <div class="metric-label">Scheduled Campus Events</div>
+      <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        Next: <strong><%= stats[:events].first ? stats[:events].first[:title] : "None" %></strong>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Card 3: Complaints (Links to /complaints) -->
+  <%= link_to "/complaints", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">🛠️ Maintenance Requests</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Helpdesk ↗</span>
+      </div>
+      <div class="metric-number" style="color: var(--warning);"><%= stats[:complaints][:open_count] %></div>
+      <div class="metric-label">Pending Service Requests</div>
+      <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        Total Logged: <strong><%= stats[:complaints][:total_count] %></strong>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="grid grid-cols-2" style="gap: 20px;">
+  <!-- Notifications -->
+  <div class="card">
+    <h3 class="card-title">📢 Staff Notices & Broadcasts</h3>
+    <% stats[:notifications].each do |n| %>
+      <div style="padding: 10px 0; border-top: 1px solid var(--gray-100);">
+        <strong style="color: var(--gray-900);"><%= n[:title] %></strong>
+        <p style="margin: 4px 0 0; font-size: 0.85rem; color: var(--gray-600);"><%= n[:message] %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Departments Overview -->
+  <div class="card">
+    <h3 class="card-title">🏢 Department Facilities</h3>
+    <% stats[:departments].each do |d| %>
+      <div style="padding: 8px 0; border-top: 1px solid var(--gray-100); display: flex; justify-content: space-between;">
+        <span><%= d[:name] %></span>
+        <span class="badge badge-open"><%= d[:total_members] %> Users</span>
+      </div>
+    <% end %>
+  </div>
+</div>

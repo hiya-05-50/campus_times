@@ -1,0 +1,117 @@
+<!-- Admin Role Dashboard -->
+<div class="grid grid-cols-3" style="margin-bottom: 24px;">
+  <!-- Card 1: Users (Links to /users) -->
+  <%= link_to "/users", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">👥 Campus Users</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Directory ↗</span>
+      </div>
+      <div class="metric-number"><%= stats[:users][:total] %></div>
+      <div class="metric-label">Registered Accounts</div>
+      <div style="display: flex; gap: 12px; margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        <span>Students: <strong><%= stats[:users][:students] %></strong></span>
+        <span>Faculty: <strong><%= stats[:users][:faculty] %></strong></span>
+        <span>Staff: <strong><%= stats[:users][:staff] %></strong></span>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Card 2: Attendance Risk (Links to /class_sessions) -->
+  <%= link_to class_sessions_path, style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">⚠️ Attendance Risk</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Sessions ↗</span>
+      </div>
+      <div class="metric-number" style="color: <%= stats[:attendance_risk][:at_risk_count].positive? ? 'var(--danger)' : 'var(--success)' %>;">
+        <%= stats[:attendance_risk][:at_risk_count] %>
+      </div>
+      <div class="metric-label">Students Below 75% Attendance</div>
+      <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        <% if stats[:attendance_risk][:at_risk_count].positive? %>
+          <span style="color: var(--danger); font-weight: 600;">Debarment warnings issued</span>
+        <% else %>
+          <span style="color: var(--success); font-weight: 600;">No attendance debarment alerts</span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Card 3: Placements (Links to /placements) -->
+  <%= link_to "/placements", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="transition: transform 0.2s, box-shadow 0.2s; height: 100%; box-sizing: border-box;" onmouseover="this.style.boxShadow='var(--shadow-lg)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--shadow)'; this.style.transform='none'">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="card-title" style="margin: 0;">💼 Placement Oversight</span>
+        <span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">Placements ↗</span>
+      </div>
+      <div class="metric-number"><%= stats[:placements][:total_drives] %></div>
+      <div class="metric-label">Total Corporate Drives</div>
+      <div style="display: flex; gap: 12px; margin-top: 12px; font-size: 0.85rem; color: var(--gray-600);">
+        <span>Active: <strong><%= stats[:placements][:open_drives] %></strong></span>
+        <span>Applicants: <strong><%= stats[:placements][:total_applications] %></strong></span>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="grid grid-cols-2" style="gap: 20px;">
+  <!-- Card 4: Departments (Links to /courses or /departments) -->
+  <%= link_to "/courses", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="height: 100%; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="card-title" style="margin: 0;">🏢 Academic Departments</h3>
+        <span style="font-size: 0.8rem; color: var(--primary);">Departments ↗</span>
+      </div>
+      <% if stats[:departments].any? %>
+        <% stats[:departments].each do |dept| %>
+          <div style="padding: 10px 0; border-top: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <strong><%= dept[:name] %></strong>
+              <div style="font-size: 0.8rem; color: var(--gray-600);"><%= dept[:courses_count] %> Courses Registered</div>
+            </div>
+            <div>
+              <span class="badge badge-open"><%= dept[:students_count] %> Students</span>
+            </div>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-state" style="padding: 16px;">No departments configured.</div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Card 5: Complaints (Links to /complaints) -->
+  <%= link_to "/complaints", style: "text-decoration: none; color: inherit;" do %>
+    <div class="card" style="height: 100%; box-sizing: border-box;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 class="card-title" style="margin: 0;">🎫 Helpdesk Complaints Operations</h3>
+        <span style="font-size: 0.8rem; color: var(--primary);">Helpdesk ↗</span>
+      </div>
+      <div style="display: flex; gap: 20px; margin-bottom: 14px;">
+        <div>
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--warning);"><%= stats[:complaints][:open_count] %></span>
+          <div class="metric-label">Open Issues</div>
+        </div>
+        <div>
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--success);"><%= stats[:complaints][:resolved_count] %></span>
+          <div class="metric-label">Resolved</div>
+        </div>
+        <div>
+          <span style="font-size: 1.5rem; font-weight: 700; color: var(--primary);"><%= stats[:complaints][:total_count] %></span>
+          <div class="metric-label">Total Logged</div>
+        </div>
+      </div>
+      <% if stats[:complaints][:recent].any? %>
+        <% stats[:complaints][:recent].each do |c| %>
+          <div style="padding: 6px 0; border-top: 1px solid var(--gray-100); font-size: 0.85rem; display: flex; justify-content: space-between;">
+            <span style="color: var(--gray-800);"><%= c[:title].truncate(30) %></span>
+            <span class="badge <%= c[:status] == 'open' ? 'badge-danger' : 'badge-open' %>"><%= c[:status] %></span>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="empty-state" style="padding: 16px;">No active complaints in the system.</div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,54 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "attendance" %>
+<% end %>
+
+<div class="container">
+  <div class="header-bar">
+    <div>
+      <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--primary); letter-spacing: 0.05em;">
+        Campus Times Portal
+      </span>
+      <h1 class="title">Welcome, <%= current_user.name %></h1>
+      <p class="subtitle">
+        Signed in as <strong style="text-transform: capitalize;"><%= current_user.role %></strong>
+        <% if current_user.department.present? %>
+          · <%= current_user.department %>
+        <% end %>
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <%= link_to "Campus AI Assistant 💬", "/ai-assistant", class: "btn btn-secondary", style: "border-color: #cbd5e1;" %>
+      <% if current_user.faculty? || current_user.admin? %>
+        <%= link_to "+ Open Attendance Session", new_class_session_path, class: "btn btn-primary" %>
+      <% else %>
+        <%= link_to "My Attendance Portal →", attendances_path, class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if notice.present? %>
+    <div class="alert alert-success">
+      <span><%= notice %></span>
+    </div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="alert alert-danger">
+      <span><%= alert %></span>
+    </div>
+  <% end %>
+
+  <% case @role %>
+  <% when "student" %>
+    <%= render "dashboards/student_dashboard", stats: @stats %>
+  <% when "faculty" %>
+    <%= render "dashboards/faculty_dashboard", stats: @stats %>
+  <% when "admin" %>
+    <%= render "dashboards/admin_dashboard", stats: @stats %>
+  <% when "staff" %>
+    <%= render "dashboards/staff_dashboard", stats: @stats %>
+  <% else %>
+    <%= render "dashboards/student_dashboard", stats: @stats %>
+  <% end %>
+</div>
